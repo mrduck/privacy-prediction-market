@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
     anvil: {
       accounts: [
         {
-          privateKey: "",
+          privateKey: "0xc5a48aea9a75ac19c5a032ee5293b1ee08d0f88c8ae4ff402d3fd894e513d683",
           balance: "100000000000000000"
         }
       ],
