@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: [
         {
-          privateKey: "0x0fafa549c1cf3bde8d44b79e56e231d4f048634823fbffc49b232798ec5c434a",
+          privateKey: "",
           balance: "100000000000000000"
         }
       ],
