@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
     sepolia: {
       accounts: [
         {
-          privateKey: "0x0fafa549c1cf3bde8d44b79e56e231d4f048634823fbffc49b232798ec5c434a",
+          privateKey: "0xc5a48aea9a75ac19c5a032ee5293b1ee08d0f88c8ae4ff402d3fd894e513d683",
           balance: "100000000000000000"
         }
       ],
