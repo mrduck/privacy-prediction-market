@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 全局基础样式 */
+body {
+  @apply bg-zama-dark font-inter text-gray-100 min-h-screen;
+}
+
+/* 自定义工具类（对应界面中的特殊效果） */
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+  }
+  .gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(90deg, #6366f1, #8b5cf6);
+  }
+  .market-card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-zama-primary/20;
+  }
+  .nav-link {
+    @apply text-gray-300 hover:text-white transition;
+  }
+  .btn-outline {
+    @apply px-4 py-2 rounded-full border border-zama-primary text-zama-primary hover:bg-zama-primary/10 transition;
+  }
+  .btn-primary {
+    @apply px-4 py-2 rounded-full bg-gradient-to-r from-zama-primary to-zama-secondary text-white hover:opacity-90 transition;
+  }
+  .input-dark {
+    @apply w-full py-2 px-4 rounded-lg bg-zama-card border border-gray-700 text-white focus:outline-none focus:border-zama-primary;
+  }
+}
