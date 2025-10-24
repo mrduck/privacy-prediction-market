@@ -1,6 +1,6 @@
 // components/TopHolder.jsx
 import React, { useEffect, useState } from 'react';
-import { getTopHolders } from '../api'; // 需封装后端接口
+import { getTopHolders } from '../api'; // Backend API needs to be encapsulated
 
 // components/TopHolder.jsx
 const TopHolder = ({ marketId }) => {
@@ -8,7 +8,7 @@ const TopHolder = ({ marketId }) => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
-    const [total, setTotal] = useState(0); // 新增：存储总记录数
+    const [total, setTotal] = useState(0); // Added: Store total number of records
 
     useEffect(() => {
         const fetchData = async () => {
@@ -16,21 +16,21 @@ const TopHolder = ({ marketId }) => {
                 const res = await getTopHolders(marketId, page, limit);
                 if (res.success) {
                     setHolders(res.data);
-                    setTotal(res.total); // 🔴 接收并存储总记录数
+                    setTotal(res.total); // 🔴 Receive and store total records
                 }
                 setLoading(false);
             } catch (err) {
-                console.error('获取投注榜失败:', err);
+                console.error('Failed to fetch top bettors list:', err);
                 setLoading(false);
             }
         };
         fetchData();
     }, [marketId, page, limit]);
 
-    // 计算总页数
+    // Calculate total number of pages
     const totalPages = Math.ceil(total / limit);
 
-    // 页码切换逻辑（新增：基于 totalPages 判断边界）
+    // Page switching logic (Added: Judge boundaries based on totalPages)
     const handlePrevPage = () => {
         if (page > 1) setPage(page - 1);
     };
@@ -40,25 +40,25 @@ const TopHolder = ({ marketId }) => {
 
     return (
         <div className="bg-gray-800 rounded-lg p-4 mt-6">
-            <h3 className="text-lg font-semibold text-white mb-3">投注量靠前用户</h3>
-            {/* 表格内容（保持不变） */}
+            <h3 className="text-lg font-semibold text-white mb-3">Top Bettors by Bet Amount</h3>
+            {/* Table content (kept unchanged) */}
 
-            {/* 分页控制区（新增：显示总页数） */}
+            {/* Pagination control area (Added: Display total pages) */}
             <div className="flex justify-center mt-4 gap-2">
                 <button
                     onClick={handlePrevPage}
                     disabled={page === 1}
                     className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
                 >
-                    上一页
+                    Previous
                 </button>
-                <span className="text-white">{`第 ${page}/${totalPages} 页（共 ${total} 条记录）`}</span>
+                <span className="text-white">{`Page ${page}/${totalPages} (Total ${total} records)`}</span>
                 <button
                     onClick={handleNextPage}
                     disabled={page >= totalPages}
                     className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
                 >
-                    下一页
+                    Next
                 </button>
             </div>
         </div>

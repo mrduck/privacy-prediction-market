@@ -2,83 +2,83 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 /**
- * 市场交易量趋势图组件
- * @param {Array} data - 格式化后的每日交易量数据
- *   格式：[{ date: "2025-10-01", "选项A": 100, "选项B": 200 }, ...]
- * @param {Array} options - 市场的选项数组（如 ["选项A", "选项B"]）
+ * Market Trading Volume Trend Chart Component
+ * @param {Array} data - Formatted daily trading volume data
+ *   Format: [{ date: "2025-10-01", "Option A": 100, "Option B": 200 }, ...]
+ * @param {Array} options - Market options array (e.g., ["Option A", "Option B"])
  */
 const MarketChart = ({ data, options }) => {
-    // 颜色映射表（为每个选项分配固定颜色，避免切换顺序导致颜色混乱）
+    // Color mapping table (assign fixed colors to each option to avoid color confusion when order changes)
     const OPTION_COLORS = [
-        '#FF6B6B', // 红色
-        '#06D6A0', // 绿色
-        '#118AB2', // 蓝色
-        '#FFD166', // 黄色
-        '#9B5DE5', // 紫色
-        '#F15BB5', // 粉色
+        '#FF6B6B', // Red
+        '#06D6A0', // Green
+        '#118AB2', // Blue
+        '#FFD166', // Yellow
+        '#9B5DE5', // Purple
+        '#F15BB5', // Pink
     ];
 
-    // 处理空数据情况
+    // Handle empty data scenario
     if (!data || data.length === 0) {
         return (
             <div className="bg-gray-800 rounded-lg p-8 mt-6 text-center">
-                <p className="text-gray-400">暂无交易数据</p>
+                <p className="text-gray-400">No transaction data available</p>
             </div>
         );
     }
 
     return (
         <div className="bg-gray-800 rounded-lg p-4 mt-6">
-            <h3 className="text-lg font-semibold text-white mb-4">每日交易量趋势</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Daily Trading Volume Trend</h3>
 
-            {/* 响应式容器，适配不同屏幕宽度 */}
+            {/* Responsive container, adapts to different screen widths */}
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                     data={data}
                     margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
-                    {/* 网格线 */}
+                    {/* Grid lines */}
                     <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#444444" // 深色网格，适配深色主题
-                        vertical={false} // 隐藏垂直网格线，减少视觉干扰
+                        stroke="#444444" // Dark grid, fits dark theme
+                        vertical={false} // Hide vertical grid lines to reduce visual clutter
                     />
 
-                    {/* X轴（日期） */}
+                    {/* X-axis (Date) */}
                     <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 12, fill: '#aaaaaa' }} // 灰色文字，适配深色背景
-                        tickLine={false} // 隐藏刻度线
-                        axisLine={{ stroke: '#555555' }} // 轴线颜色
+                        tick={{ fontSize: 12, fill: '#aaaaaa' }} // Gray text, fits dark background
+                        tickLine={false} // Hide tick lines
+                        axisLine={{ stroke: '#555555' }} // Axis line color
                     />
 
-                    {/* Y轴（交易量） */}
+                    {/* Y-axis (Trading Volume) */}
                     <YAxis
                         tick={{ fontSize: 12, fill: '#aaaaaa' }}
                         tickLine={false}
                         axisLine={{ stroke: '#555555' }}
-                        // 格式化Y轴数值（千位分隔）
+                        // Format Y-axis values (with thousand separators)
                         tickFormatter={(value) => value >= 1000
                             ? `${(value / 1000).toFixed(1)}k`
                             : value
                         }
                     />
 
-                    {/* 提示框 */}
+                    {/* Tooltip */}
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: '#2d2d2d', // 深色背景
+                            backgroundColor: '#2d2d2d', // Dark background
                             border: '1px solid #444',
                             borderRadius: '4px',
                             color: '#fff'
                         }}
                         labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
                         itemStyle={{ color: '#ffffff' }}
-                        // 格式化提示框数值（显示完整数字）
-                        formatter={(value) => [`${value}`, '交易量']}
+                        // Format tooltip values (show full number)
+                        formatter={(value) => [`${value}`, 'Trading Volume']}
                     />
 
-                    {/* 图例 */}
+                    {/* Legend */}
                     <Legend
                         iconType="circle"
                         iconSize={8}
@@ -89,17 +89,17 @@ const MarketChart = ({ data, options }) => {
                         textStyle={{ color: '#aaaaaa', fontSize: 12 }}
                     />
 
-                    {/* 为每个选项生成趋势线 */}
+                    {/* Generate trend line for each option */}
                     {options.map((option, index) => (
                         <Line
                             key={index}
                             type="monotone"
-                            dataKey={option} // 匹配数据中的选项名称（如"选项A"）
-                            stroke={OPTION_COLORS[index % OPTION_COLORS.length]} // 循环使用颜色表
+                            dataKey={option} // Match option name in data (e.g., "Option A")
+                            stroke={OPTION_COLORS[index % OPTION_COLORS.length]} // Reuse color table cyclically
                             strokeWidth={2}
-                            dot={false} // 隐藏数据点，突出趋势线
-                            activeDot={{ r: 6, strokeWidth: 0 }} // 鼠标悬停时显示圆点
-                            connectNulls={true} // 数据为空时连接线条（避免断裂）
+                            dot={false} // Hide data points to highlight trend line
+                            activeDot={{ r: 6, strokeWidth: 0 }} // Show dot when mouse hovers
+                            connectNulls={true} // Connect lines when data is null (avoid breaks)
                         />
                     ))}
                 </LineChart>

@@ -6,14 +6,14 @@ const WalletComponent = () => {
     return (
         <div>
             {isConnecting ? (
-                <p>连接中...</p>
+                <p>Connecting...</p>
             ) : walletAddress ? (
                 <div>
-                    <p>地址: {walletAddress}</p>
-                    <button onClick={disconnectWallet}>断开连接</button>
+                    <p>Address: {walletAddress}</p>
+                    <button onClick={disconnectWallet}>Disconnect Wallet</button>
                 </div>
             ) : (
-                <button onClick={connectWallet}>连接钱包</button>
+                <button onClick={connectWallet}>Connect Wallet</button>
             )}
         </div>
     );

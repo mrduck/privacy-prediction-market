@@ -9,22 +9,22 @@ const EventCreate = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleCreate = async () => {
-        if (!walletAddress) return toast.error("请先连接钱包");
-        if (!question) return toast.error("请输入事件问题");
-        if (!endTime) return toast.error("请选择截止时间");
+        if (!walletAddress) return toast.error("Please connect your wallet first");
+        if (!question) return toast.error("Please enter the event question");
+        if (!endTime) return toast.error("Please select an end time");
 
         try {
             setIsLoading(true);
             const endTimeStamp = Math.floor(new Date(endTime).getTime() / 1000);
             if (endTimeStamp <= Date.now() / 1000) {
-                return toast.error("截止时间必须晚于现在");
+                return toast.error("The end time must be later than now");
             }
-            // 暂时模拟创建成功（后续对接合约）
-            toast.success("事件创建成功（模拟）！");
+            // Temporarily simulate successful creation (to be connected to contract later)
+            toast.success("Event created successfully (simulation)!");
             setQuestion("");
             setEndTime("");
         } catch (error) {
-            toast.error(`创建失败：${error.message}`);
+            toast.error(`Creation failed: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -33,21 +33,21 @@ const EventCreate = () => {
     if (!walletAddress) {
         return (
             <div className="bg-white rounded-lg shadow p-6 opacity-70">
-                <h2 className="text-xl font-semibold mb-2">创建预测事件</h2>
-                <p className="text-gray-500">连接钱包后可创建事件</p>
+                <h2 className="text-xl font-semibold mb-2">Create Prediction Event</h2>
+                <p className="text-gray-500">Connect wallet to create events</p>
             </div>
         );
     }
 
     return (
         <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">创建预测事件</h2>
+            <h2 className="text-xl font-semibold mb-4">Create Prediction Event</h2>
             <div className="space-y-4">
                 <input
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="例如：2024年某球赛A队会胜吗？"
+                    placeholder="e.g., Will Team A win the 2024 match?"
                     className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <input
@@ -61,7 +61,7 @@ const EventCreate = () => {
                     disabled={isLoading}
                     className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
                 >
-                    {isLoading ? "创建中..." : "创建事件"}
+                    {isLoading ? "Creating..." : "Create Event"}
                 </button>
             </div>
         </div>

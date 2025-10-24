@@ -1,27 +1,27 @@
 // src/components/SearchFilter.js
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext'; // 引入上下文 Hook
+import { useAppContext } from '../context/AppContext'; // Import context Hook
 
 const SearchFilter = () => {
     const navigate = useNavigate();
-    // 从上下文获取登录状态和弹窗控制方法
+    // Get login status and modal control method from context
     const { isLoggedIn, setIsLoginOpen } = useAppContext();
 
-    // 点击“Create Market”的逻辑
+    // Logic for clicking "Create Market"
     const handleCreateMarket = () => {
         if (isLoggedIn) {
-            // 已登录 → 跳转到创建页面
+            // Logged in → Navigate to create page
             navigate('/create-market');
         } else {
-            // 未登录 → 打开登录弹窗
+            // Not logged in → Open login modal
             setIsLoginOpen(true);
         }
     };
 
     return (
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-            {/* 搜索框 */}
+            {/* Search Box */}
             <div className="relative w-full md:w-1/2 mb-4 md:mb-0">
                 <input
                     type="text"
@@ -31,7 +31,7 @@ const SearchFilter = () => {
                 <i className="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
             </div>
 
-            {/* 筛选/排序/创建按钮组 */}
+            {/* Filter/Sort/Create Button Group */}
             <div className="flex flex-wrap items-center gap-2">
                 <button className="px-4 py-2 rounded-lg bg-zama-card border border-gray-700 hover:border-zama-primary transition">
                     <i className="fa fa-filter mr-2"></i>Filter

@@ -3,15 +3,15 @@ import { Web3ReactProvider, useWeb3React } from "@web3-react/core";
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
-import { getUser, addUser } from "../api"; // 新增：导入获取当前用户信息的接口
-import {initializeFheInstance} from "../utils/zamaIntance";
+import { getUser, addUser } from "../api"; // Added: Import API for fetching current user info
+import { initializeFheInstance } from "../utils/zamaIntance";
 
-// 配置连接器（支持注入式钱包：MetaMask、OKX等）
+// Configure connector (supports injected wallets: MetaMask, OKX, etc.)
 const injectedConnector = new InjectedConnector({
-    supportedChainIds: [11155111], // Sepolia 测试网
+    supportedChainIds: [11155111], // Sepolia Testnet
 });
 
-// 修正 getLibrary，返回 MinimalProvider 实例
+// Fix getLibrary to return MinimalProvider instance
 const getLibrary = (provider) => {
     if (provider) {
         return new ethers.BrowserProvider(provider);
@@ -20,11 +20,11 @@ const getLibrary = (provider) => {
     }
 };
 
-// 创建上下文
+// Create context
 const AppContext = createContext();
 
-// 合约配置（替换为实际地址和ABI）
-const CONTRACT_ADDRESS = "0x你的实际合约地址";
+// Contract configuration (replace with actual address and ABI)
+const CONTRACT_ADDRESS = "0xYourActualContractAddress";
 const CONTRACT_ABI = [
     "function createEvent(string calldata _question, uint256 _endTime) external",
     "function submitVote(uint256 _eventId, bytes calldata _encryptedVote) external",
@@ -33,10 +33,10 @@ const CONTRACT_ABI = [
 ];
 
 export const AppProvider = ({ children }) => {
-    // web3-react 状态
+    // web3-react state
     const { activate, deactivate, account, provider, chainId } = useWeb3React();
 
-    // 用户核心状态
+    // Core user state
     const [userAddress, setUserAddress] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('zamaToken'));
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -47,12 +47,13 @@ export const AppProvider = ({ children }) => {
     const [currentEventId, setCurrentEventId] = useState(null);
     const [view, setView] = useState("list");
 
-    const [fheInstance, setFheInstance] = useState(null); // 存储 Zama 实例
-    const [fheInitStatus, setFheInitStatus] = useState('idle'); // 实例初始化状态：idle/loading/success/error
-    const [fheErrorMsg, setFheErrorMsg] = useState(null); // 实例初始化错误信息
+    // Zama instance related states
+    const [fheInstance, setFheInstance] = useState(null); // Store Zama instance
+    const [fheInitStatus, setFheInitStatus] = useState('idle'); // Instance initialization status: idle/loading/success/error
+    const [fheErrorMsg, setFheErrorMsg] = useState(null); // Instance initialization error message
 
 
-    // 通过 token 拉取用户信息（页面加载时执行）
+    // Fetch user info via token (executed on page load)
     useEffect(() => {
         const token = localStorage.getItem('zamaToken');
         if (token && !isLoggedIn) {
@@ -65,48 +66,48 @@ export const AppProvider = ({ children }) => {
                     const res = await getUser();
                     if (res.success && res.data.walletAddress) {
                         setUserAddress(res.data.walletAddress);
-                        toast.success("用户信息同步成功");
+                        toast.success("User info synced successfully");
                     } else {
                         localStorage.removeItem('zamaToken');
                         setIsLoggedIn(false);
                         setUserAddress('');
-                        toast.error("用户信息无效，请重新登录");
+                        toast.error("Invalid user info, please log in again");
                     }
                 } catch (err) {
-                    console.error("通过 token 获取用户信息失败:", err);
+                    console.error("Failed to fetch user info via token:", err);
                     localStorage.removeItem('zamaToken');
                     setIsLoggedIn(false);
                     setUserAddress('');
-                    toast.error("登录状态失效，请重新登录");
+                    toast.error("Login session expired, please log in again");
                 }
             };
             fetchUserByToken();
         }
     }, [isLoggedIn, userAddress]);
 
-    // 同步钱包地址（钱包连接时执行）
+    // Sync wallet address (executed when wallet connects)
     useEffect(() => {
         if (account) {
             setUserAddress(account);
             if (isLoggedIn) {
-                syncUserData(account); // 已登录时同步用户信息
+                syncUserData(account); // Sync user info when logged in
             }
         }
     }, [account, isLoggedIn]);
 
-    // 页面加载时恢复钱包连接
+    // Restore wallet connection on page load
     useEffect(() => {
         const token = localStorage.getItem('zamaToken');
         if (token && isLoggedIn && !account) {
-            console.log("页面刷新，尝试恢复钱包连接...");
+            console.log("Page refreshed, attempting to restore wallet connection...");
             activate(injectedConnector, undefined, { reloadOnDisconnect: false })
                 .catch(err => {
-                    console.log("静默激活失败，需用户手动连接：", err);
+                    console.log("Silent activation failed, user needs to connect manually:", err);
                 });
         }
     }, [isLoggedIn, account, activate]);
 
-    // 初始化 signer 和合约（原有逻辑）
+    // Initialize signer and contract (original logic)
     useEffect(() => {
         if (!provider || !account) {
             setSigner(null);
@@ -127,8 +128,8 @@ export const AppProvider = ({ children }) => {
                 );
                 setContract(contractInstance);
             } catch (err) {
-                console.error("初始化signer/合约失败:", err);
-                toast.warning("合约初始化失败");
+                console.error("Failed to initialize signer/contract:", err);
+                toast.warning("Contract initialization failed");
             }
         };
 
@@ -136,70 +137,70 @@ export const AppProvider = ({ children }) => {
     }, [provider, account]);
 
     useEffect(() => {
-        // 初始化条件：钱包已连接（account 存在）+ Zama 未初始化（fheInitStatus 为 idle）
+        // Initialization condition: Wallet connected (account exists) + Zama not initialized (fheInitStatus is idle)
         if (!account || fheInitStatus !== 'idle') return;
 
         const initZamaInstance = async () => {
             setFheInitStatus('loading');
             setFheErrorMsg(null);
             try {
-                // 调用 Zama 初始化函数（需传入钱包 provider，按你的 zamaIntance.js 实际参数调整）
+                // Call Zama initialization function (pass wallet provider, adjust based on actual parameters in your zamaIntance.js)
                 const zamaInstance = await initializeFheInstance();
-                setFheInstance(zamaInstance); // 存入 Context
+                setFheInstance(zamaInstance); // Store in Context
                 setFheInitStatus('success');
-                console.log('✅ Zama FHEVM 实例初始化成功');
-                toast.success("Zama 隐私计算实例已就绪");
+                console.log('✅ Zama FHEVM instance initialized successfully');
+                toast.success("Zama privacy computing instance is ready");
             } catch (error) {
-                const errMsg = error instanceof Error ? error.message : "Zama 实例初始化失败";
+                const errMsg = error instanceof Error ? error.message : "Zama instance initialization failed";
                 setFheErrorMsg(errMsg);
                 setFheInitStatus('error');
-                console.error("Zama 初始化失败:", error);
+                console.error("Zama initialization failed:", error);
                 toast.error(errMsg);
             }
         };
 
         initZamaInstance();
-    }, [account]); // 依赖钱包地址，钱包连接成功后触发
+    }, [account]); // Depends on wallet address, triggered after successful wallet connection
 
-    // 4. 新增：Zama 实例重新初始化方法（供组件调用，比如初始化失败后重试）
+    // 4. Added: Zama instance reinitialization method (for components to call, e.g., retry after initialization failure)
     const reinitZamaInstance = async () => {
-        if (fheInitStatus === 'loading') return; // 防止重复请求
+        if (fheInitStatus === 'loading') return; // Prevent duplicate requests
         setFheInitStatus('loading');
         setFheErrorMsg(null);
         try {
             const zamaInstance = await initializeFheInstance();
             setFheInstance(zamaInstance);
             setFheInitStatus('success');
-            toast.success("Zama 实例重新初始化成功");
+            toast.success("Zama instance reinitialized successfully");
         } catch (error) {
-            const errMsg = error instanceof Error ? error.message : "Zama 实例重新初始化失败";
+            const errMsg = error instanceof Error ? error.message : "Zama instance reinitialization failed";
             setFheErrorMsg(errMsg);
             setFheInitStatus('error');
             toast.error(errMsg);
         }
     };
 
-    // 连接钱包（原有逻辑）
+    // Connect wallet (original logic)
     const connectWallet = async () => {
         setIsConnecting(true);
         try {
             await activate(injectedConnector, undefined, { reloadOnDisconnect: false });
 
             if (account) {
-                toast.success(`钱包连接成功：${account.slice(0, 6)}...${account.slice(-4)}`);
+                toast.success(`Wallet connected successfully: ${account.slice(0, 6)}...${account.slice(-4)}`);
                 setUserAddress(account);
                 await syncUserData(account);
             }
         } catch (err) {
-            console.error("连接失败:", err);
+            console.error("Connection failed:", err);
             if (err.name === "UnsupportedChainIdError") {
-                toast.loading("正在切换到 Sepolia 测试网...");
+                toast.loading("Switching to Sepolia Testnet...");
                 try {
                     const TARGET_CHAIN_HEX = "0xaa36a7";
                     await window.ethereum.send("wallet_switchEthereumChain", [{ chainId: TARGET_CHAIN_HEX }]);
                     await activate(injectedConnector, undefined, { reloadOnDisconnect: false });
                     if (account) {
-                        toast.success(`钱包连接成功：${account.slice(0, 6)}...${account.slice(-4)}`);
+                        toast.success(`Wallet connected successfully: ${account.slice(0, 6)}...${account.slice(-4)}`);
                         setUserAddress(account);
                         await syncUserData(account);
                     }
@@ -216,13 +217,13 @@ export const AppProvider = ({ children }) => {
                         ]);
                         await activate(injectedConnector, undefined, { reloadOnDisconnect: false });
                     } else {
-                        toast.error("请先将钱包切换到 Sepolia 测试网");
+                        toast.error("Please switch your wallet to Sepolia Testnet first");
                     }
                 }
             } else {
                 const errorMsg = err.message.includes("User rejected")
-                    ? "您拒绝了钱包授权"
-                    : `连接失败：${err.message || "未知错误"}`;
+                    ? "You rejected wallet authorization"
+                    : `Connection failed: ${err.message || "Unknown error"}`;
                 toast.error(errorMsg);
             }
         } finally {
@@ -230,25 +231,25 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    // 登录后自动尝试连接钱包
+    // Auto-attempt wallet connection after login
     useEffect(() => {
         if (isLoggedIn && !account && !isConnecting) {
-            console.log("已登录但钱包未连接，自动尝试连接...");
+            console.log("Logged in but wallet not connected, auto-attempting connection...");
             connectWallet();
         }
     }, [isLoggedIn, account, isConnecting, connectWallet]);
 
-    // 断开连接（修正：保留登录态）
+    // Disconnect wallet (fixed: retain login state)
     const disconnectWallet = () => {
         deactivate();
         setUserInfo(null);
         setSigner(null);
         setContract(null);
         setUserAddress('');
-        toast.error("钱包已断开");
+        toast.error("Wallet disconnected");
     };
 
-    // 同步用户数据（原有逻辑）
+    // Sync user data (original logic)
     const syncUserData = async (address) => {
         try {
             const userRes = await getUser(address);
@@ -263,12 +264,12 @@ export const AppProvider = ({ children }) => {
                 setUserInfo(newUserRes.user);
             }
         } catch (err) {
-            console.error("用户数据同步失败:", err);
-            toast.warning("钱包已连接，但用户数据同步失败");
+            console.error("Failed to sync user data:", err);
+            toast.warning("Wallet connected, but user data sync failed");
         }
     };
 
-    // 网络切换逻辑（原有）
+    // Network switch logic (original)
     useEffect(() => {
         const TARGET_CHAIN_ID = 11155111;
         const TARGET_CHAIN_HEX = "0xaa36a7";
@@ -291,11 +292,11 @@ export const AppProvider = ({ children }) => {
                             }
                         ]);
                     } catch (addErr) {
-                        console.error("添加网络失败:", addErr);
-                        toast.error("请手动添加 Sepolia 测试网");
+                        console.error("Failed to add network:", addErr);
+                        toast.error("Please add Sepolia Testnet manually");
                     }
                 } else {
-                    toast.error("请手动切换到 Sepolia 测试网");
+                    toast.error("Please switch to Sepolia Testnet manually");
                 }
             }
         };
@@ -303,13 +304,13 @@ export const AppProvider = ({ children }) => {
         switchNetwork();
     }, [chainId, provider]);
 
-    // 视图切换（原有）
+    // View switch (original)
     const switchView = (newView, eventId = null) => {
         setView(newView);
         if (eventId !== null) setCurrentEventId(eventId);
     };
 
-    // 暴露状态和方法
+    // Expose states and methods
     const value = {
         walletAddress: account,
         provider,
@@ -330,11 +331,11 @@ export const AppProvider = ({ children }) => {
         currentEventId,
         view,
         switchView,
-        // Zama FHEVM 新增内容
-        fheInstance, // Zama 实例（供组件调用加密/解密方法）
-        fheInitStatus, // 实例初始化状态（供组件判断是否可用）
-        fheErrorMsg, // 实例初始化错误（供组件显示错误信息）
-        reinitZamaInstance // 重新初始化方法（供组件重试）
+        // Zama FHEVM added content
+        fheInstance, // Zama instance (for components to call encryption/decryption methods)
+        fheInitStatus, // Instance initialization status (for components to check availability)
+        fheErrorMsg, // Instance initialization error (for components to display error info)
+        reinitZamaInstance // Reinitialization method (for components to retry)
     };
 
     return (
@@ -344,10 +345,10 @@ export const AppProvider = ({ children }) => {
     );
 };
 
-// 自定义 Hook（供组件获取上下文）
+// Custom Hook (for components to get context)
 export const useAppContext = () => useContext(AppContext);
 
-// 根组件包裹（在 index.js 中使用）
+// Root component wrapper (used in index.js)
 export const AppWrapper = ({ children }) => (
     <Web3ReactProvider getLibrary={getLibrary}>
         <AppProvider>

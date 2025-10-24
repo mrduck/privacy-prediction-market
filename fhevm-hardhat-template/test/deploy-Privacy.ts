@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
-import { PrivacyVoting, PrivacyToken, PredictionMarket } from "../types";
+import hre from "hardhat";
+import { PrivacyVoteTicket, PrivacyToken, PredictionMarket } from "../types";
 
 // 合约配置参数（可根据实际需求修改）
 const CONFIG = {
@@ -24,11 +25,11 @@ async function main() {
   console.log("======================================\n");
 
   // ------------------------------
-  // 步骤1：部署PrivacyVoting（Vote合约）
+  // 步骤1：部署PrivacyVoteTicket（Vote合约）
   // ------------------------------
-  console.log("1. 部署 PrivacyVoting 合约...");
-  const VoteFactory = await ethers.getContractFactory("PrivacyVoting");
-  const voting: PrivacyVoting = await VoteFactory.deploy(
+  console.log("1. 部署 PrivacyVoteTicket 合约...");
+  const VoteFactory = await ethers.getContractFactory("PrivacyVoteTicket");
+  const voting: PrivacyVoteTicket = await VoteFactory.deploy(
     deployerAddr,                  // initialOwner（部署者）
     CONFIG.voteNoteName,           // 票据名称
     CONFIG.voteNoteSymbol,         // 票据符号
@@ -36,7 +37,23 @@ async function main() {
   );
   await voting.waitForDeployment();
   const votingAddr = await voting.getAddress();
-  console.log(`✅ PrivacyVoting 部署完成：${votingAddr}`);
+  console.log(`✅ PrivacyVoteTicket 部署完成：${votingAddr}`);
+
+  // console.log("⏳ 验证 PrivacyVoteTicket 合约...");
+  // try {
+  //   await hre.run("verify:verify", {
+  //     address: votingAddr,
+  //     constructorArguments: [
+  //       deployerAddr,
+  //       CONFIG.voteNoteName,
+  //       CONFIG.voteNoteSymbol,
+  //       CONFIG.voteNoteDecimals
+  //     ],
+  //   });
+  //   console.log("✅ PrivacyVoteTicket 验证成功");
+  // } catch (error) {
+  //   console.log("⚠️ PrivacyVoteTicket 验证失败:", error.message);
+  // }
 
   // ------------------------------
   // 步骤2：部署PrivacyToken（Token合约）
@@ -68,6 +85,25 @@ async function main() {
   }
   console.log(`✅ Vote已成功绑定Token地址：${boundToken}`);
 
+  // 验证 PrivacyToken
+  // console.log("⏳ 验证 PrivacyToken 合约...");
+  // try {
+  //   await hre.run("verify:verify", {
+  //     address: tokenAddr,
+  //     constructorArguments: [
+  //       deployerAddr,
+  //       CONFIG.tokenInitialSupply,
+  //       CONFIG.tokenName,
+  //       CONFIG.tokenSymbol,
+  //       CONFIG.tokenUri,
+  //       votingAddr
+  //     ],
+  //   });
+  //   console.log("✅ PrivacyToken 验证成功");
+  // } catch (error) {
+  //   console.log("⚠️ PrivacyToken 验证失败:", error.message);
+  // }
+
   // ------------------------------
   // 步骤4：部署PredictionMarket（市场合约）
   // 依赖：需传入Token和Vote合约地址
@@ -81,6 +117,18 @@ async function main() {
   await market.waitForDeployment();
   const marketAddr = await market.getAddress();
   console.log(`✅ PredictionMarket 部署完成：${marketAddr}`);
+
+  // 验证 PredictionMarket
+  // console.log("⏳ 验证 PredictionMarket 合约...");
+  // try {
+  //   await hre.run("verify:verify", {
+  //     address: marketAddr,
+  //     constructorArguments: [tokenAddr, votingAddr],
+  //   });
+  //   console.log("✅ PredictionMarket 验证成功");
+  // } catch (error) {
+  //   console.log("⚠️ PredictionMarket 验证失败:", error.message);
+  // }
 
   // ------------------------------
   // 步骤5：权限授权（双向授权+市场合约授权）
@@ -121,7 +169,7 @@ async function main() {
   // ------------------------------
   console.log("\n======================================");
   console.log("🎉 所有合约部署及授权完成！");
-  console.log(`- PrivacyVoting: ${votingAddr}`);
+  console.log(`- PrivacyVoteTicket: ${votingAddr}`);
   console.log(`- PrivacyToken: ${tokenAddr}`);
   console.log(`- PredictionMarket: ${marketAddr}`);
   console.log("======================================\n");
@@ -140,17 +188,17 @@ main()
 // 部署者地址：0x5b3581B5A44b0c93ED2bce9708A549C8496B680b
 // ======================================
 //
-// 1. 部署 PrivacyVoting 合约...
-// ✅ PrivacyVoting 部署完成：0xc58306822935f9a024aF264c74B3a675A7b79B98
+// 1. 部署 PrivacyVoteTicket 合约...
+// ✅ PrivacyVoteTicket 部署完成：0x88d458415D2110f8ec373De5Ac1878b837BE900a
 //
 // 2. 部署 PrivacyToken 合约...
-// ✅ PrivacyToken 部署完成：0xB3F8bFD4c5D484B78E42A50624A528e17c014ABE
+// ✅ PrivacyToken 部署完成：0x0892d63C1bc130d39A129a23696f87dDd763cEb4
 //
 // 3. 绑定 Vote → Token 地址...
-// ✅ Vote已成功绑定Token地址：0xB3F8bFD4c5D484B78E42A50624A528e17c014ABE
+// ✅ Vote已成功绑定Token地址：0x0892d63C1bc130d39A129a23696f87dDd763cEb4
 //
 // 4. 部署 PredictionMarket 合约...
-// ✅ PredictionMarket 部署完成：0xF5520368b51cc6091C5A1357bF65757dB5fD69E3
+// ✅ PredictionMarket 部署完成：0x0babE07D6C6aCaa7d9E9C18D59bf4324172468e0
 //
 // 5. 开始权限授权...
 // - Vote拥有Token的MINTER_ROLE：✅
@@ -160,9 +208,9 @@ main()
 //
 // ======================================
 // 🎉 所有合约部署及授权完成！
-// - PrivacyVoting: 0xc58306822935f9a024aF264c74B3a675A7b79B98
-// - PrivacyToken: 0xB3F8bFD4c5D484B78E42A50624A528e17c014ABE
-// - PredictionMarket: 0xF5520368b51cc6091C5A1357bF65757dB5fD69E3
+// - PrivacyVoteTicket: 0x88d458415D2110f8ec373De5Ac1878b837BE900a
+// - PrivacyToken: 0x0892d63C1bc130d39A129a23696f87dDd763cEb4
+// - PredictionMarket: 0x0babE07D6C6aCaa7d9E9C18D59bf4324172468e0
 // ======================================
 
 

@@ -1,17 +1,17 @@
-// chainApi.js - 封装与链上合约交互的方法（替代原api.js中从sqlite读取的逻辑）
+// chainApi.js - Encapsulates methods for interacting with on-chain contracts (replaces SQLite reading logic in original api.js)
 /* global BigInt */
 import { ethers } from 'ethers';
 
-// -------------------------- 链上配置（需与你的合约和网络匹配）--------------------------
-// 1. 合约地址（你的 PredictionMarket 合约地址）
-export const MARKET_CONTRACT_ADDRESS = '0xF5520368b51cc6091C5A1357bF65757dB5fD69E3';
-export const PRIVACY_TOKEN_ADDRESS = '0xB3F8bFD4c5D484B78E42A50624A528e17c014ABE';
-export const PRIVACY_VOTE_ADDRESS = '0xc58306822935f9a024aF264c74B3a675A7b79B98';
+// -------------------------- On-chain Configuration (must match your contract and network) --------------------------
+// 1. Contract Addresses (your PredictionMarket contract address)
+export const MARKET_CONTRACT_ADDRESS = '0x0babE07D6C6aCaa7d9E9C18D59bf4324172468e0';
+export const PRIVACY_TOKEN_ADDRESS = '0x0892d63C1bc130d39A129a23696f87dDd763cEb4';
+export const PRIVACY_VOTE_ADDRESS = '0x88d458415D2110f8ec373De5Ac1878b837BE900a';
 
-// 2. RPC 节点（Sepolia 测试网，可替换为 Alchemy 等其他节点）
+// 2. RPC Node (Sepolia Testnet, can be replaced with other nodes like Alchemy)
 const RPC_URL = 'https://sepolia.infura.io/v3/6f7297d3a3b3445190b7b33caed682e9';
 // const instance = await createInstance(SepoliaConfig);
-// 3. 合约 ABI（仅包含需要调用的 view 方法，简化版）
+// 3. Contract ABI (contains only required view methods, simplified version)
 const MARKET_ABI = [
     {
         "inputs": [
@@ -22,32 +22,32 @@ const MARKET_ABI = [
         "name": "getMarketList",
         "outputs": [
             {
-                // 第一个返回值：MarketListResult 结构体
+                // First return value: MarketListResult struct
                 "components": [
                     {
-                        // 结构体中的 items 字段：MarketListItem[] 数组
+                        // items field in struct: MarketListItem[] array
                         "components": [
-                            // MarketListItem 的 7 个字段（顺序、类型与合约完全一致！）
-                            { "internalType": "uint256", "name": "marketId", "type": "uint256" },    // 1. 正确
-                            { "internalType": "string", "name": "title", "type": "string" },        // 2. 正确
-                            { "internalType": "string", "name": "description", "type": "string" },  // 3. 正确
+                            // 7 fields of MarketListItem (order and type must match contract exactly!)
+                            { "internalType": "uint256", "name": "marketId", "type": "uint256" },    // 1. Correct
+                            { "internalType": "string", "name": "title", "type": "string" },        // 2. Correct
+                            { "internalType": "string", "name": "description", "type": "string" },  // 3. Correct
                             { "internalType": "string", "name": "imageUrl", "type": "string" },
-                            { "internalType": "bool", "name": "isSettled", "type": "bool" },        // 4. 正确
-                            { "internalType": "bool", "name": "isCanceled", "type": "bool" },       // 5. 正确
-                            { "internalType": "uint256", "name": "voteEndTime", "type": "uint256" }, // 6. 正确
-                            { "internalType": "uint8", "name": "optionCount", "type": "uint8" },     // 7. 关键修正：是 uint8！
-                            { "internalType": "uint8", "name": "category", "type": "uint8" }, // 分类（1-5）
-                            { "internalType": "uint64", "name": "totalMarketCap", "type": "uint64" }, // 总市值
+                            { "internalType": "bool", "name": "isSettled", "type": "bool" },        // 4. Correct
+                            { "internalType": "bool", "name": "isCanceled", "type": "bool" },       // 5. Correct
+                            { "internalType": "uint256", "name": "voteEndTime", "type": "uint256" }, // 6. Correct
+                            { "internalType": "uint8", "name": "optionCount", "type": "uint8" },     // 7. Key fix: it's uint8!
+                            { "internalType": "uint8", "name": "category", "type": "uint8" }, // Category (1-5)
+                            { "internalType": "uint64", "name": "totalMarketCap", "type": "uint64" }, // Total Market Cap
                             { "internalType": "uint64", "name": "totalVolume", "type": "uint64" }
                         ],
                         "internalType": "struct PredictionMarket.MarketListItem[]",
                         "name": "items",
                         "type": "tuple[]"
                     },
-                    { "internalType": "uint256", "name": "totalCount", "type": "uint256" }      // 第二个返回值：总数量
+                    { "internalType": "uint256", "name": "totalCount", "type": "uint256" }      // Second return value: total count
                 ],
                 "internalType": "struct PredictionMarket.MarketListResult",
-                "name": "",  // 结构体返回值名称可空，但 components 必须正确
+                "name": "",  // Struct return value name can be empty, but components must be correct
                 "type": "tuple"
             }
         ],
@@ -197,8 +197,8 @@ const MARKET_ABI = [
             { "internalType": "uint64", "name": "amount", "type": "uint64" }
         ],
         "name": "vote",
-        "outputs": [], // 无返回值（交易哈希通过 tx.hash 获取）
-        "stateMutability": "nonpayable", // 需要发送交易（消耗gas）
+        "outputs": [], // No return value (transaction hash obtained via tx.hash)
+        "stateMutability": "nonpayable", // Requires transaction (gas consumption)
         "type": "function"
     },
 ];
@@ -242,7 +242,7 @@ const VOTE_ABI = [
         ],
         "name": "getVotingNoteBalance",
         "outputs": [
-            { "internalType": "euint64", "name": "", "type": "bytes" } // euint64 加密类型在 ABI 中以 bytes 呈现
+            { "internalType": "euint64", "name": "", "type": "bytes" } // euint64 encrypted type is represented as bytes in ABI
         ],
         "stateMutability": "view",
         "type": "function"
@@ -250,97 +250,97 @@ const VOTE_ABI = [
 ]
 // --------------------------------------------------------------------------
 
-// 初始化合约实例（只读，无需签名，仅用于读取链上数据）
+// Initialize contract instance (read-only, no signature required, for reading on-chain data only)
 let marketContract;
 function initContract() {
     if (!marketContract) {
-        // 连接到 RPC 节点（只读模式，无需用户钱包）
+        // Connect to RPC node (read-only mode, no user wallet required)
         const provider = new ethers.JsonRpcProvider(RPC_URL);
-        // 创建合约实例
+        // Create contract instance
         marketContract = new ethers.Contract(
             MARKET_CONTRACT_ADDRESS,
             MARKET_ABI,
-            provider  // 用 provider 而非 signer，因为读取数据不需要签名
+            provider  // Use provider instead of signer (signature not needed for reading data)
         );
     }
     return marketContract;
 }
 
 /**
- * 从链上读取市场列表（分页）
- * @param {number} page - 页码（从1开始）
- * @param {number} pageSize - 每页数量（1-100）
- * @param {boolean} isDesc - 是否降序（true: 最新的在前，false: 最早的在前）
- * @returns {Promise<{ items: MarketListItem[], totalCount: number }>} 市场列表数据
+ * Read market list from on-chain (pagination)
+ * @param {number} page - Page number (starts from 1)
+ * @param {number} pageSize - Items per page (1-100)
+ * @param {boolean} isDesc - Whether to sort in descending order (true: newest first, false: oldest first)
+ * @returns {Promise<{ items: MarketListItem[], totalCount: number }>} Market list data
  */
 export async function getMarketListFromChain(page, pageSize, isDesc = true) {
     try {
-        // 1. 初始化合约
+        // 1. Initialize contract
         const contract = initContract();
 
-        // 2. 调用合约的 getMarketList 方法（链上读取，无需交易费）
+        // 2. Call contract's getMarketList method (on-chain reading, no transaction fee required)
         const [items, totalCount] = await contract.getMarketList(page, pageSize, isDesc);
 
-        // 3. 转换数据格式（将 BigInt 转为 number/string，适配前端展示）
+        // 3. Convert data format (convert BigInt to number/string for frontend display)
         const formattedItems = items.map(item => ({
-            marketId: item.marketId.toString(),  // 市场ID（转为字符串避免精度丢失）
-            title: item.title,                   // 标题
-            description: item.description,       // 描述
+            marketId: item.marketId.toString(),  // Market ID (convert to string to avoid precision loss)
+            title: item.title,                   // Title
+            description: item.description,       // Description
             imageUrl: item.imageUrl,
-            isSettled: item.isSettled,           // 是否已结算
-            isCanceled: item.isCanceled,         // 是否已取消
-            voteEndTime: new Date(Number(item.voteEndTime) * 1000).toLocaleString(), // 转换为本地时间
-            optionCount: Number(item.optionCount), // 选项数量
-            category: Number(item.category), // 分类（1-5）
-            totalMarketCap: Number(item.totalMarketCap), // 总市值
-            totalVolume: Number(item.totalVolume) // 总交易量
+            isSettled: item.isSettled,           // Whether settled
+            isCanceled: item.isCanceled,         // Whether canceled
+            voteEndTime: new Date(Number(item.voteEndTime) * 1000).toLocaleString(), // Convert to local time
+            optionCount: Number(item.optionCount), // Number of options
+            category: Number(item.category), // Category (1-5)
+            totalMarketCap: Number(item.totalMarketCap), // Total Market Cap
+            totalVolume: Number(item.totalVolume) // Total Trading Volume
         }));
 
         console.log(`formattedItems:${formattedItems}`);
-        console.log('formattedItems:',formattedItems);
+        console.log('formattedItems:', formattedItems);
         console.log(`count:${totalCount}`);
-        // 4. 返回格式化后的数据
+        // 4. Return formatted data
         return {
             items: formattedItems,
-            totalCount: Number(totalCount)  // 总市场数
+            totalCount: Number(totalCount)  // Total number of markets
         };
     } catch (error) {
-        console.error('❌ 从链上读取市场列表失败：', error.message);
-        throw new Error(`获取市场列表失败：${error.message}`); // 抛给前端处理
+        console.error('❌ Failed to read market list from on-chain:', error.message);
+        throw new Error(`Failed to get market list: ${error.message}`); // Throw to frontend for handling
     }
 }
 
 /**
- * 在链上创建新市场（需要用户钱包签名）
- * @param {string} title - 市场标题（需唯一）
- * @param {string} description - 市场描述
- * @param {string} imageUrl - 封面图 URL
- * @param {string[]} options - 投票选项数组（至少 2 个）
- * @param {number[]} odds - 对应选项的赔率数组（与 options 长度一致）
- * @param {number} voteEndTime - 投票截止时间（时间戳，单位：秒）
- * @param {number} resultTime - 结果公布时间（时间戳，单位：秒，需晚于 voteEndTime）
- * @returns {Promise<string>} 新创建的市场 ID
+ * Create new market on-chain (requires user wallet signature)
+ * @param {string} title - Market title (must be unique)
+ * @param {string} description - Market description
+ * @param {string} imageUrl - Cover image URL
+ * @param {string[]} options - Voting options array (at least 2 items)
+ * @param {number[]} odds - Odds array corresponding to options (length matches options)
+ * @param {number} voteEndTime - Voting end time (timestamp in seconds)
+ * @param {number} resultTime - Result announcement time (timestamp in seconds, must be later than voteEndTime)
+ * @returns {Promise<string>} Newly created market ID
  */
 export async function createMarketFromChain(title, description, imageUrl, category, options, odds, voteEndTime, resultTime) {
     try {
-        // 1. 检查钱包是否存在（如 MetaMask）
+        // 1. Check if wallet exists (e.g., MetaMask)
         if (!window.ethereum) {
-            throw new Error("请安装 MetaMask 钱包并连接");
+            throw new Error("Please install MetaMask wallet and connect");
         }
 
-        // 2. 连接钱包并获取签名者（signer）
+        // 2. Connect wallet and get signer
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        console.log("当前钱包地址：", await signer.getAddress());
+        console.log("Current wallet address:", await signer.getAddress());
 
-        // 3. 初始化可写合约实例（使用 signer 支持交易签名）
+        // 3. Initialize writable contract instance (use signer to support transaction signing)
         const contract = new ethers.Contract(
             MARKET_CONTRACT_ADDRESS,
             MARKET_ABI,
             signer
         );
 
-        // 4. 发送“创建市场”交易（设置足够 Gas 上限）
+        // 4. Send "create market" transaction (set sufficient gas limit)
         const tx = await contract.createMarket(
             title,
             description,
@@ -350,73 +350,73 @@ export async function createMarketFromChain(title, description, imageUrl, catego
             odds,
             voteEndTime,
             resultTime,
-            { gasLimit: 3000000 } // FHE 合约需较高 Gas
+            { gasLimit: 3000000 } // Higher gas required for FHE contracts
         );
-        console.log("交易已发送，哈希：", tx.hash);
+        console.log("Transaction sent, hash:", tx.hash);
 
-        // 5. 等待交易确认（上链）
+        // 5. Wait for transaction confirmation (on-chain)
         const receipt = await tx.wait();
-        console.log("交易已确认，区块号：", receipt.blockNumber);
+        console.log("Transaction confirmed, block number:", receipt.blockNumber);
 
-        // 6. 从事件中提取市场 ID（通过 MarketCreated 事件更可靠）
+        // 6. Extract market ID from event (more reliable via MarketCreated event)
         let marketCreatedEvent = null;
         for (const log of receipt.logs) {
-            // 过滤：只处理当前合约的日志
+            // Filter: process only logs from current contract
             if (log.address.toLowerCase() !== MARKET_CONTRACT_ADDRESS.toLowerCase()) {
                 continue;
             }
             try {
-                // 用合约ABI手动解析日志（与测试脚本逻辑一致）
+                // Manually parse log with contract ABI (consistent with test script logic)
                 const parsedEvent = contract.interface.parseLog(log);
                 if (parsedEvent.name === "MarketCreated") {
                     marketCreatedEvent = parsedEvent;
-                    break; // 找到目标事件，退出循环
+                    break; // Target event found, exit loop
                 }
             } catch (err) {
-                // 忽略无法解析的日志（非目标事件）
+                // Ignore unparseable logs (non-target events)
                 continue;
             }
         }
 
         if (!marketCreatedEvent) {
-            throw new Error("未找到MarketCreated事件，无法获取市场ID");
+            throw new Error("MarketCreated event not found, unable to get market ID");
         }
         const marketId = marketCreatedEvent.args.marketId.toString();
 
-        console.log("市场创建成功，ID：", marketId);
+        console.log("Market created successfully, ID:", marketId);
         return marketId;
     } catch (error) {
-        console.error("❌ 创建市场失败：", error.message);
-        throw new Error(`创建市场失败：${error.message}`);
+        console.error("❌ Failed to create market:", error.message);
+        throw new Error(`Failed to create market: ${error.message}`);
     }
 }
 
 export const getMarketDetail = async (marketId) => {
     try {
         if (!window.ethereum) {
-            throw new Error('请先连接钱包');
+            throw new Error('Please connect wallet first');
         }
 
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        console.log("当前钱包地址：", await signer.getAddress());
+        console.log("Current wallet address:", await signer.getAddress());
 
-        // 3. 初始化可写合约实例（使用 signer 支持交易签名）
+        // 3. Initialize writable contract instance (use signer to support transaction signing)
         const contract = new ethers.Contract(
             MARKET_CONTRACT_ADDRESS,
             MARKET_ABI,
             signer
         );
 
-        // 3. 转换marketId为数字（合约要求uint256类型）
+        // 3. Convert marketId to number (contract requires uint256 type)
         const marketIdNum = Number(marketId);
-        console.log(`convert market id:${marketId}`)
+        console.log(`convert market id:${marketId}`);
         if (isNaN(marketIdNum)) {
-            throw new Error('无效的市场ID');
+            throw new Error('Invalid market ID');
         }
 
-        // 4. 调用合约getMarketInfo（view函数，无需gas）
-        const [title,description,category,imageUrl,options,odds,voteEndTime,resultTime,isSettled,isCanceled,winningOption,totalMarketCap,totalVolume] = await contract.getMarketInfo(marketIdNum);
+        // 4. Call contract's getMarketInfo (view function, no gas required)
+        const [title, description, category, imageUrl, options, odds, voteEndTime, resultTime, isSettled, isCanceled, winningOption, totalMarketCap, totalVolume] = await contract.getMarketInfo(marketIdNum);
         console.log(`title:${title}`);
         console.log(`description:${description}`);
         console.log(`imageUrl:${imageUrl}`);
@@ -428,90 +428,90 @@ export const getMarketDetail = async (marketId) => {
         console.log(`isCanceled:${isCanceled}`);
         console.log(`winningOption:${winningOption}`);
         console.log(`category:${category}`);
-        console.log(`category:${totalMarketCap}`);
-        console.log(`category:${totalVolume}`);
-        // 5. 整理数据（处理BigNumber类型，转换为字符串/数字）
+        console.log(`totalMarketCap:${totalMarketCap}`);
+        console.log(`totalVolume:${totalVolume}`);
+        // 5. Organize data (handle BigNumber type, convert to string/number)
         const marketData = {
-            marketId: marketIdNum, // 补充市场ID（合约返回值中没有，手动添加）
+            marketId: marketIdNum, // Add market ID manually (not included in contract return value)
             title,
             description,
-            imageUrl, // 关键：包含图片URL
+            imageUrl, // Key: include image URL
             category: Number(category),
-            options: options.map(opt => opt), // 转换为普通数组
-            odds: odds.map(odd => Number(odd)), // uint64转数字
-            voteEndTime: voteEndTime.toString(), // 时间戳转字符串（避免大数问题）
+            options: options.map(opt => opt), // Convert to regular array
+            odds: odds.map(odd => Number(odd)), // Convert uint64 to number
+            voteEndTime: voteEndTime.toString(), // Convert timestamp to string (avoid big number issues)
             resultTime: resultTime.toString(),
             isSettled,
             isCanceled,
-            winningOption: Number(winningOption), // uint8转数字
-            totalMarketCap: Number(totalMarketCap), // 总市值
+            winningOption: Number(winningOption), // Convert uint8 to number
+            totalMarketCap: Number(totalMarketCap), // Total Market Cap
             totalVolume: Number(totalVolume)
         };
 
-        return {success: true, data: marketData};
+        return { success: true, data: marketData };
 
     } catch (error) {
-        console.error('获取市场详情失败:', error);
-        // 处理合约revert错误（如"Market does not exist"）
+        console.error('Failed to get market details:', error);
+        // Handle contract revert errors (e.g., "Market does not exist")
         const errorMsg = error.message.includes('reverted:')
             ? error.message.split('reverted: ')[1]
             : error.message;
-        return {success: false, error: errorMsg};
+        return { success: false, error: errorMsg };
     }
 }
 
 export async function vote(marketId, optionIndex, amount) {
     try {
-        // 1. 检查钱包是否存在（如 MetaMask）
+        // 1. Check if wallet exists (e.g., MetaMask)
         if (!window.ethereum) {
-            throw new Error("请安装 MetaMask 钱包并连接");
+            throw new Error("Please install MetaMask wallet and connect");
         }
 
-        // 2. 连接钱包并获取签名者（signer）
+        // 2. Connect wallet and get signer
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const voterAddress = await signer.getAddress();
-        console.log(`当前投注用户地址：${voterAddress}`);
+        console.log(`Current voter address: ${voterAddress}`);
 
-        // 3. 参数验证
+        // 3. Parameter validation
         if (isNaN(marketId) || marketId < 0) {
-            throw new Error("无效的市场ID（必须为非负整数）");
+            throw new Error("Invalid market ID (must be non-negative integer)");
         }
         if (isNaN(optionIndex) || optionIndex < 0) {
-            throw new Error("无效的选项索引（必须为非负整数）");
+            throw new Error("Invalid option index (must be non-negative integer)");
         }
         if (isNaN(amount) || amount <= 0 || amount > Number.MAX_SAFE_INTEGER) {
-            throw new Error("投注金额必须为正数且不超过安全整数范围");
+            throw new Error("Bet amount must be positive and within safe integer range");
         }
 
-        // 4. 初始化可写合约实例（使用 signer 支持交易签名）
+        // 4. Initialize writable contract instance (use signer to support transaction signing)
         const contract = new ethers.Contract(
             MARKET_CONTRACT_ADDRESS,
             MARKET_ABI,
             signer
         );
 
-        // 5. 发送投注交易（设置足够的 Gas 上限，FHE 合约需较高 Gas）
-        console.log(`发送投注交易：市场ID=${marketId}，选项索引=${optionIndex}，金额=${amount}`);
+        // 5. Send bet transaction (set sufficient gas limit, higher gas required for FHE contracts)
+        console.log(`Sending bet transaction: marketId=${marketId}, optionIndex=${optionIndex}, amount=${amount}`);
         const tx = await contract.vote(
-            marketId,       // 市场ID（uint256）
-            optionIndex,    // 选项索引（uint8）
-            amount,         // 投注金额（uint64）
-            { gasLimit: 2000000 } // 调整Gas上限，避免交易失败
+            marketId,       // Market ID (uint256)
+            optionIndex,    // Option index (uint8)
+            amount,         // Bet amount (uint64)
+            { gasLimit: 2000000 } // Adjust gas limit to avoid transaction failure
         );
 
-        console.log(`投注交易已发送，哈希：${tx.hash}`);
+        console.log(`Bet transaction sent, hash: ${tx.hash}`);
 
-        // 6. 等待交易确认（上链）
+        // 6. Wait for transaction confirmation (on-chain)
         const receipt = await tx.wait();
-        console.log(`投注交易已确认，区块号：${receipt.blockNumber}`);
+        console.log(`Bet transaction confirmed, block number: ${receipt.blockNumber}`);
 
-        // 7. 验证交易是否成功
+        // 7. Verify if transaction was successful
         if (receipt.status !== 1) {
-            throw new Error("投注交易失败（状态码非1）");
+            throw new Error("Bet transaction failed (status code not 1)");
         }
 
-        // 8. 从事件中提取投注信息（可选，用于前端展示）
+        // 8. Extract bet info from event (optional, for frontend display)
         let voteEvent = null;
         for (const log of receipt.logs) {
             if (log.address.toLowerCase() !== MARKET_CONTRACT_ADDRESS.toLowerCase()) {
@@ -529,208 +529,208 @@ export async function vote(marketId, optionIndex, amount) {
         }
 
         if (voteEvent) {
-            console.log(`投注成功：用户=${voteEvent.args.voter}，市场ID=${voteEvent.args.marketId}，选项=${voteEvent.args.optionIndex}，金额=${voteEvent.args.amount}`);
+            console.log(`Bet successful: voter=${voteEvent.args.voter}, marketId=${voteEvent.args.marketId}, option=${voteEvent.args.optionIndex}, amount=${voteEvent.args.amount}`);
         }
 
-        return tx.hash; // 返回交易哈希，供前端跟踪
+        return tx.hash; // Return transaction hash for frontend tracking
 
     } catch (error) {
-        console.error("❌ 投注失败：", error.message);
-        // 提取合约 revert 错误信息（如"Voting closed"等）
+        console.error("❌ Bet failed:", error.message);
+        // Extract contract revert error message (e.g., "Voting closed")
         const errorMsg = error.message.includes('reverted:')
             ? error.message.split('reverted: ')[1]
             : error.message;
-        throw new Error(`投注失败：${errorMsg}`);
+        throw new Error(`Bet failed: ${errorMsg}`);
     }
 }
 
 /**
- * 从链上获取市场的投票记录（分页）
- * @param {number} marketId - 市场ID（uint256）
- * @param {number} page - 页码（从1开始，uint256）
- * @param {number} pageSize - 每页数量（1-100，uint256）
+ * Get market vote records from on-chain (pagination)
+ * @param {number} marketId - Market ID (uint256)
+ * @param {number} page - Page number (starts from 1, uint256)
+ * @param {number} pageSize - Items per page (1-100, uint256)
  * @returns {Promise<{ records: Array<{voter: string, optionIndex: number, amount: number, timestamp: number}>, totalCount: number }>}
- *          投票记录列表及总数量
+ *          Vote records list and total count
  */
 export async function getMarketVoteRecords(marketId, page, pageSize) {
     try {
-        // 1. 检查钱包是否连接（至少需要只读连接）
+        // 1. Check if wallet is connected (read-only connection at minimum)
         if (!window.ethereum) {
-            throw new Error("请先连接钱包");
+            throw new Error("Please connect wallet first");
         }
 
-        // 2. 初始化 provider 和合约实例（只读模式，无需签名）
+        // 2. Initialize provider and contract instance (read-only mode, no signature required)
         const provider = new ethers.BrowserProvider(window.ethereum);
         const contract = new ethers.Contract(
             MARKET_CONTRACT_ADDRESS,
             MARKET_ABI,
-            provider // 读取数据用 provider 即可，无需 signer
+            provider // Provider is sufficient for reading data, no signer needed
         );
 
-        // 3. 参数验证（防止无效调用）
+        // 3. Parameter validation (prevent invalid calls)
         if (isNaN(marketId) || marketId < 0) {
-            throw new Error("无效的市场ID（必须为非负整数）");
+            throw new Error("Invalid market ID (must be non-negative integer)");
         }
         if (isNaN(page) || page < 1) {
-            throw new Error("页码必须≥1");
+            throw new Error("Page number must be ≥ 1");
         }
         if (isNaN(pageSize) || pageSize < 1) {
-            throw new Error("每页数量必须为1-100");
+            throw new Error("Items per page must be 1-100");
         }
 
-        // 4. 调用合约的 getMarketVoteRecords 方法
+        // 4. Call contract's getMarketVoteRecords method
         const [records, totalCount] = await contract.getMarketVoteRecords(
-            marketId,    // 市场ID（转为 uint256）
-            page,        // 页码（转为 uint256）
-            pageSize     // 每页数量（转为 uint256）
+            marketId,    // Market ID (converted to uint256)
+            page,        // Page number (converted to uint256)
+            pageSize     // Items per page (converted to uint256)
         );
 
-        // 5. 格式化返回数据（将 BigInt 转为 Number，适配前端处理）
+        // 5. Format return data (convert BigInt to Number for frontend handling)
         const formattedRecords = records.map(record => ({
-            voter: record.voter, // 投票者地址（string）
-            optionIndex: Number(record.optionIndex), // 选项索引（uint8 → number）
-            amount: Number(record.amount), // 投票金额（uint64 → number）
-            timestamp: Number(record.timestamp) // 投票时间戳（uint256 → 秒级 number）
+            voter: record.voter, // Voter address (string)
+            optionIndex: Number(record.optionIndex), // Option index (uint8 → number)
+            amount: Number(record.amount), // Vote amount (uint64 → number)
+            timestamp: Number(record.timestamp) // Vote timestamp (uint256 → number in seconds)
         }));
 
-        // 6. 返回格式化结果
+        // 6. Return formatted result
         return {
             records: formattedRecords,
-            totalCount: Number(totalCount) // 总记录数（uint256 → number）
+            totalCount: Number(totalCount) // Total record count (uint256 → number)
         };
 
     } catch (error) {
-        console.error(`获取市场${marketId}的投票记录失败:`, error);
-        // 提取合约 revert 错误信息（如"Market does not exist"）
+        console.error(`Failed to get vote records for market ${marketId}:`, error);
+        // Extract contract revert error message (e.g., "Market does not exist")
         const errorMsg = error.message.includes('reverted:')
             ? error.message.split('reverted: ')[1]
             : error.message;
-        throw new Error(`获取投票记录失败：${errorMsg}`);
+        throw new Error(`Failed to get vote records: ${errorMsg}`);
     }
 }
 
-// chainApi.js 新增方法
+// New method added to chainApi.js
 export async function requestFaucet(amount = 100) {
     try {
-        // 1. 检查钱包连接
+        // 1. Check wallet connection
         if (!window.ethereum) {
-            throw new Error("请先连接钱包");
+            throw new Error("Please connect wallet first");
         }
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const userAddress = await signer.getAddress();
 
-        // 2. 初始化合约实例（使用 PrivacyToken 合约地址和 ABI）
+        // 2. Initialize contract instance (use PrivacyToken contract address and ABI)
         const tokenContract = new ethers.Contract(
-            PRIVACY_TOKEN_ADDRESS, // 替换为你的 PrivacyToken 合约地址
-            TOKEN_ABI,     // 需包含 mint 方法的 ABI
+            PRIVACY_TOKEN_ADDRESS, // Replace with your PrivacyToken contract address
+            TOKEN_ABI,     // ABI containing mint method
             signer
         );
 
-        // 3. 参数校验（符合合约 uint64 类型，最大值 18446744073709551615）
+        // 3. Parameter validation (matches contract uint64 type, max value 18446744073709551615)
         if (amount <= 0 || amount > 1e18) {
-            throw new Error("领取数量必须为正数且不超过 1e18");
+            throw new Error("Claim amount must be positive and not exceed 1e18");
         }
 
-        // 4. 调用合约 mint 方法（向当前用户铸造代币）
-        const tx = await tokenContract.mint(amount); // 合约中 mint 方法参数为 uint64 amount
-        await tx.wait(); // 等待交易确认
+        // 4. Call contract's mint method (mint tokens to current user)
+        const tx = await tokenContract.mint(amount); // mint method in contract accepts uint64 amount
+        await tx.wait(); // Wait for transaction confirmation
 
-        console.log(`地址:${userAddress} Faucet 领取成功：${amount} 代币，交易哈希：${tx.hash}`);
+        console.log(`Faucet claimed successfully for address:${userAddress} - ${amount} tokens, transaction hash: ${tx.hash}`);
         return { success: true, txHash: tx.hash };
 
     } catch (error) {
-        console.error("Faucet 领取失败：", error);
-        // 提取合约 revert 错误信息（如总量超限）
+        console.error("Faucet claim failed:", error);
+        // Extract contract revert error message (e.g., total supply exceeded)
         const errorMsg = error.message.includes('reverted:')
             ? error.message.split('reverted: ')[1]
             : error.message;
-        throw new Error(`领取失败：${errorMsg}`);
+        throw new Error(`Claim failed: ${errorMsg}`);
     }
 }
 
-// chainApi.js 新增方法
+// New method added to chainApi.js
 /**
- * 将代币兑换为票据（调用 PrivacyToken.deposit 方法）
- * @param {number} amount - 兑换数量（uint64 类型）
+ * Convert tokens to notes (call PrivacyToken.deposit method)
+ * @param {number} amount - Conversion amount (uint64 type)
  */
 export async function depositTokens(amount) {
     try {
-        if (!window.ethereum) throw new Error("请连接钱包");
+        if (!window.ethereum) throw new Error("Please connect wallet");
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
 
-        // 初始化 PrivacyToken 合约实例
+        // Initialize PrivacyToken contract instance
         const tokenContract = new ethers.Contract(
-            PRIVACY_TOKEN_ADDRESS, // PrivacyToken 合约地址
-            TOKEN_ABI,     // 包含 deposit 方法的 ABI
+            PRIVACY_TOKEN_ADDRESS, // PrivacyToken contract address
+            TOKEN_ABI,     // ABI containing deposit method
             signer
         );
 
-        // 调用合约 deposit 方法（参数为 uint64 类型的金额）
+        // Call contract's deposit method (accepts uint64 amount)
         const tx = await tokenContract.deposit(amount);
-        return tx; // 返回交易对象，由调用方等待确认
+        return tx; // Return transaction object, caller waits for confirmation
     } catch (error) {
-        console.error("代币兑换票据失败：", error);
+        console.error("Token to note conversion failed:", error);
         const errorMsg = error.message.includes('reverted:')
             ? error.message.split('reverted: ')[1]
             : error.message;
-        throw new Error(`兑换失败：${errorMsg}`);
+        throw new Error(`Conversion failed: ${errorMsg}`);
     }
 }
 
 export async function getNoteBalance() {
     try {
-        if (!window.ethereum) throw new Error("请连接钱包");
+        if (!window.ethereum) throw new Error("Please connect wallet");
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const userAddress = await signer.getAddress();
         const votingContract = new ethers.Contract(
-            PRIVACY_VOTE_ADDRESS, // PrivacyVoting 合约地址
+            PRIVACY_VOTE_ADDRESS, // PrivacyVoting contract address
             VOTE_ABI,
             signer
         );
 
-        // 调用合约方法获取加密余额（euint64）
+        // Call contract method to get encrypted balance (euint64)
         const iface = new ethers.Interface(VOTE_ABI);
-        const callData = iface.encodeFunctionData('getVotingNoteBalance',[userAddress]);
+        const callData = iface.encodeFunctionData('getVotingNoteBalance', [userAddress]);
         // const encryptedBalance = await votingContract.getVotingNoteBalance(userAddress);
-        console.log(`获取投票余额:${callData}`);
-        // 注意：加密余额需要用 FHE 客户端库解密
-        // 示例（需结合 @fhevm/client）：
+        console.log(`Getting voting balance:${callData}`);
+        // Note: Encrypted balance needs to be decrypted with FHE client library
+        // Example (requires @fhevm/client):
         // const decryptedBalance = await fheClient.decrypt(encryptedBalance);
         // return Number(decryptedBalance);
 
-        return callData; // 未解密的原始加密数据（bytes）
+        return callData; // Raw encrypted data (bytes) without decryption
     } catch (error) {
-        console.error("查询票据余额失败：", error);
+        console.error("Failed to query note balance:", error);
         throw error;
     }
 }
 
 export const getTokenBalance = async (zamaInstance) => {
     try {
-        // 1. 连接 provider（只读操作无需 signer，用 provider 更轻量）
+        // 1. Connect provider (read-only operation doesn't need signer, provider is lighter)
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const userAddress = await signer.getAddress();
-        console.log(`开始查询用户 ${userAddress} 的代币余额`);
+        console.log(`Starting to query token balance for user ${userAddress}`);
 
-        // 2. 手动编码函数调用数据（完全绕过 ethers 自动处理）
-        const iface = new ethers.Interface(TOKEN_ABI); // 用 ABI 生成接口
-        // 编码 getConfidentialBalance(address) 的调用数据
+        // 2. Manually encode function call data (bypass ethers automatic handling entirely)
+        const iface = new ethers.Interface(TOKEN_ABI); // Generate interface with ABI
+        // Encode call data for getConfidentialBalance(address)
         const callData = iface.encodeFunctionData("getConfidentialBalance", [userAddress]);
-        console.log("手动编码的调用数据：", callData);
+        console.log("Manually encoded call data:", callData);
 
-        // 3. 用 provider.call 获取原始密文（不经过合约实例的解码逻辑）
+        // 3. Use provider.call to get raw ciphertext (without contract instance decoding logic)
         const encryptedBalanceBytes = await provider.call({
-            to: PRIVACY_TOKEN_ADDRESS, // 合约地址
-            data: callData             // 手动编码的调用数据
+            to: PRIVACY_TOKEN_ADDRESS, // Contract address
+            data: callData             // Manually encoded call data
         });
-        console.log("合约返回的原始加密密文：", encryptedBalanceBytes);
+        console.log("Raw encrypted ciphertext returned by contract:", encryptedBalanceBytes);
 
         const keypair = zamaInstance.generateKeypair();
-        console.log("生成密钥对：", {
+        console.log("Generated key pair:", {
             publicKey: keypair.publicKey.slice(0, 20) + "...",
             privateKey: keypair.privateKey.slice(0, 20) + "..."
         });
@@ -742,8 +742,8 @@ export const getTokenBalance = async (zamaInstance) => {
             },
         ];
 
-        const startTimeStamp = Math.floor(Date.now() / 1000).toString(); // 秒级时间戳
-        const durationDays = '10'; // 有效期10天（字符串格式）
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString(); // Timestamp in seconds
+        const durationDays = '10'; // 10-day validity (string format)
         const contractAddresses = [PRIVACY_TOKEN_ADDRESS];
 
         const eip712 = zamaInstance.createEIP712(
@@ -752,9 +752,9 @@ export const getTokenBalance = async (zamaInstance) => {
             startTimeStamp,
             durationDays,
         );
-        console.log("生成EIP712数据：", eip712);
+        console.log("Generated EIP712 data:", eip712);
 
-        // 8. 用钱包签名（注意类型指定为UserDecryptRequestVerification）
+        // 8. Sign with wallet (note: specify type as UserDecryptRequestVerification)
         // const signature = await signer.signTypedData(
         //     eip712.domain,
         //     {
@@ -762,30 +762,30 @@ export const getTokenBalance = async (zamaInstance) => {
         //     },
         //     eip712.message,
         // );
-        // console.log("签名结果：", signature.slice(0, 20) + "...");
+        // console.log("Signature result:", signature.slice(0, 20) + "...");
 
-        // 9. 调用userDecrypt解密（移除签名的0x前缀，与你的代码一致）
+        // 9. Call userDecrypt for decryption (remove 0x prefix from signature, consistent with your code)
         // const result = await zamaInstance.userDecrypt(
         //     handleContractPairs,
         //     keypair.privateKey,
         //     keypair.publicKey,
-        //     signature.replace('0x', ''), // 移除0x前缀
+        //     signature.replace('0x', ''), // Remove 0x prefix
         //     contractAddresses,
-        //     userAddress, // signer.address即当前用户地址
+        //     userAddress, // signer.address is current user address
         //     startTimeStamp,
         //     durationDays,
         // );
         //
-        // // 10. 提取解密结果
+        // // 10. Extract decryption result
         // const decryptedValue = result[encryptedBalanceBytes];
         // if (decryptedValue === undefined) {
-        //     throw new Error("解密结果为空，可能密文无效或无权限");
+        //     throw new Error("Decryption result is empty, ciphertext may be invalid or no permission");
         // }
 
-        // 11. 格式化结果（假设18位小数，根据你的代币调整）
+        // 11. Format result (assuming 18 decimals, adjust based on your token)
         // const readableValue = ethers.formatUnits(BigInt(decryptedValue), 18);
-        // console.log("解密原始值：", decryptedValue);
-        // console.log("可读余额：", readableValue);
+        // console.log("Decrypted raw value:", decryptedValue);
+        // console.log("Readable balance:", readableValue);
         // const instance = await init();
         // const instance = await createInstance(SepoliaConfig);
         // console.log(`relayer instan:${instance}`);
@@ -794,11 +794,11 @@ export const getTokenBalance = async (zamaInstance) => {
         // initializeFheInstance();
 
         // const decryptBalance = await decryptValue(encryptedBalanceBytes);
-        // console.log(`解密金额:${decryptBalance}`);
+        // console.log(`Decrypted amount:${decryptBalance}`);
         // const fhe = await init();
         // console.log(`fhe init compile`);
         return callData;
-        // 4. 解密（使用 Zama 实例）
+        // 4. Decrypt (using Zama instance)
         // const relayer = await getZamaInstance();
         // const decrypted = await relayer.userDecrypt({
         //     ciphertext: encryptedBalanceBytes,
@@ -807,24 +807,24 @@ export const getTokenBalance = async (zamaInstance) => {
         //     contractAddress: PRIVACY_TOKEN_ADDRESS,
         // });
         //
-        // console.log("解密后的余额：", decrypted.plaintext);
+        // console.log("Decrypted balance:", decrypted.plaintext);
         // return Number(decrypted.plaintext);
     } catch (error) {
-        console.error("查询余额失败（详细错误）：", error);
-        throw new Error(`查询余额失败：${error.message}`);
+        console.error("Failed to query balance (detailed error):", error);
+        throw new Error(`Failed to query balance: ${error.message}`);
     }
 };
 
 // export const decryptNoteBalance = async (encryptedBalance) => {
-//     if (!window.ethereum) throw new Error("请连接钱包");
+//     if (!window.ethereum) throw new Error("Please connect wallet");
 //     const provider = new ethers.BrowserProvider(window.ethereum);
 //     const signer = await provider.getSigner();
 //     const userAddress = await signer.getAddress();
 //     const result = await getZamaInstance().userDecrypt({
-//         ciphertext: encryptedBalance,      // 合约返回的加密数据
-//         userAddress: userAddress,         // 解密授权用户地址
-//         dataType: 'euint64',              // 数据类型（与合约一致）
-//         contractAddress: PRIVACY_VOTE_ADDRESS, // 可选：验证数据来源
+//         ciphertext: encryptedBalance,      // Encrypted data returned by contract
+//         userAddress: userAddress,         // Address of user authorized for decryption
+//         dataType: 'euint64',              // Data type (matches contract)
+//         contractAddress: PRIVACY_VOTE_ADDRESS, // Optional: verify data source
 //     });
-//     return Number(result.plaintext);    // 明文余额转为数字
+//     return Number(result.plaintext);    // Convert plaintext balance to number
 // };

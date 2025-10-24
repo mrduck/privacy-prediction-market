@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      sepolia: vars.get("YI5B3AJ7Q6RX1359VQ34YR4QRUH2WRZV3W", ""),
+      sepolia: 'YI5B3AJ7Q6RX1359VQ34YR4QRUH2WRZV3W',
     },
   },
   gasReporter: {
@@ -66,7 +66,7 @@ const config: HardhatUserConfig = {
       },
       chainId: 11155111,
       url: `https://sepolia.infura.io/v3/6f7297d3a3b3445190b7b33caed682e9`,
-    },
+    }
   },
   paths: {
     artifacts: "./artifacts",
