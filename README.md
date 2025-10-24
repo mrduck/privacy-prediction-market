@@ -1,4 +1,4 @@
-# ZAMA Predict 🔮
+# AegisPredict 🔮
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.x-367bc0?logo=solidity)
@@ -20,14 +20,14 @@
 ## 📖 About
 
 
-**ZAMA Predict** is a next-generation decentralized prediction market platform deeply integrated with **ZAMA's FHE Protocol**. Utilizing the advanced encryption technology of **ZAMA FHE Protocol**, it achieves unprecedented levels of privacy protection on the blockchain, allowing users to participate in market predictions in a completely confidential state.
+**AegisPredict** is a next-generation decentralized prediction market platform deeply integrated with **ZAMA's FHE Protocol**. Utilizing the advanced encryption technology of **ZAMA FHE Protocol**, it achieves unprecedented levels of privacy protection on the blockchain, allowing users to participate in market predictions in a completely confidential state.
 
 ### 🎬 Project Demo
 
 **Live Demo**: [https://demo.zamapredict.io](https://demo.zamapredict.io)
 
 **Video Demo**:
-[![ZAMA Predict Demo Video](https://img.shields.io/badge/Watch_Demo-Video-FF0000?logo=youtube)](https://youtube.com/watch?v=your-demo-video-id)
+[![AegisPredict Demo Video](https://img.shields.io/badge/Watch_Demo-Video-FF0000?logo=youtube)](https://youtube.com/watch?v=your-demo-video-id)
 
 
 ### 🚀 Quick Start
@@ -153,7 +153,7 @@ npx start
     - Verifiable random functions
 
 ## 🙏 Acknowledgments
-Sincere thanks to the ZAMA FHE Protocol team and community members for their hard work and selfless contributions. It is with your support that ZAMA Predict can achieve such high levels of privacy protection functionality.
+Sincere thanks to the ZAMA FHE Protocol team and community members for their hard work and selfless contributions. It is with your support that AegisPredict can achieve such high levels of privacy protection functionality.
 
 **Special Thanks**：[https://www.zama.ai/](https://community.zama.ai/) development team and all community contributors!
 
