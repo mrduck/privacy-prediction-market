@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // 创建 axios 实例（避免污染全局 axios）
 const request = axios.create({
-    baseURL: 'http://localhost:3001/api', // 后端接口基础地址
+    baseURL: 'http://privacy-prediction-market-fwqf-nopbhl4ex-hellessys-projects.vercel.app/api', // 后端接口基础地址
     timeout: 10000, // 超时时间
 });
 
