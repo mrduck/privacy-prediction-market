@@ -13,7 +13,21 @@ import "./tasks/accounts";
 import "./tasks/FHECounter";
 
 // Run 'npx hardhat vars setup' to see the list of variables that need to be set
+
+const MNEMONIC: string = vars.get("MNEMONIC", "okay breeze powder confirm violin slice number pluck forest neutral tell fiction");
+const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "6f7297d3a3b3445190b7b33caed682e9");
+
 const config: HardhatUserConfig = {
+  solidity: {
+    version: "0.8.28", // 替换为稳定版本（如0.8.20）
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+      viaIR: true
+    },
+  },
   defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: 0,
@@ -30,33 +44,28 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: [
-        {
-          privateKey: "",
-          balance: "100000000000000000"
-        }
-      ],
+      accounts: {
+        mnemonic: MNEMONIC,
+      },
       chainId: 31337,
     },
     anvil: {
-      accounts: [
-        {
-          privateKey: "0xc5a48aea9a75ac19c5a032ee5293b1ee08d0f88c8ae4ff402d3fd894e513d683",
-          balance: "100000000000000000"
-        }
-      ],
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: "m/44'/60'/0'/0/",
+        count: 10,
+      },
       chainId: 31337,
       url: "http://localhost:8545",
     },
     sepolia: {
-      accounts: [
-        {
-          privateKey: "0xc5a48aea9a75ac19c5a032ee5293b1ee08d0f88c8ae4ff402d3fd894e513d683",
-          balance: "100000000000000000"
-        }
-      ],
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: "m/44'/60'/0'/0/",
+        count: 10,
+      },
       chainId: 11155111,
-      url: `https://1rpc.io/sepolia`,
+      url: `https://sepolia.infura.io/v3/6f7297d3a3b3445190b7b33caed682e9`,
     },
   },
   paths: {
@@ -64,23 +73,6 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     sources: "./contracts",
     tests: "./test",
-  },
-  solidity: {
-    version: "0.8.27",
-    settings: {
-      metadata: {
-        // Not including the metadata hash
-        // https://github.com/paulrberg/hardhat-template/issues/31
-        bytecodeHash: "none",
-      },
-      // Disable the optimizer when debugging
-      // https://hardhat.org/hardhat-network/#solidity-optimizer-support
-      optimizer: {
-        enabled: true,
-        runs: 800,
-      },
-      evmVersion: "cancun",
-    },
   },
   typechain: {
     outDir: "types",
