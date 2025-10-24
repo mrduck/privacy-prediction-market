@@ -32,7 +32,7 @@ const upload = multer({ storage });
 
 // 🔥 Configure CORS: Allow cross-origin requests from localhost:3000
 app.use(cors({
-  origin: 'http://localhost:3000', // Domain + port where the frontend is running
+  origin: `${process.env.REACT_APP_URL || 'http://localhost:3000'}`,
   methods: ['GET', 'POST'], // Allowed HTTP methods
   credentials: true, // Allow credentials (e.g., cookies)
 }));
