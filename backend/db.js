@@ -1,7 +1,15 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // 连接数据库（文件不存在则自动创建）
-const db = new sqlite3.Database('user_data.db');
+const db = new sqlite3.Database(':memory:', (err) => {
+  if (err) {
+    console.error('数据库连接失败:', err.message);
+  } else {
+    console.log('✅ 已连接到内存数据库');
+    // 在这里创建表结构
+    initializeDatabase();
+  }
+});
 
 // ====================== 1. 创建数据表（含新增和调整） ======================
 
