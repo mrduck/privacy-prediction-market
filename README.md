@@ -9,7 +9,7 @@
 ![Privacy](https://img.shields.io/badge/Privacy-First-important)
 ![Decentralized](https://img.shields.io/badge/Decentralized-Prediction-orange)
 
-> 完全隐私保护的去中心化市场预测平台 · 基于 ZAMA FHE Protocol
+> Fully Privacy-Preserving Decentralized Market Prediction Platform · Built on ZAMA FHE Protocol
 
 ## 🌟 Featured In
 
@@ -20,146 +20,142 @@
 ## 📖 About
 
 
-**ZAMA Predict** 是一个深度集成 **ZAMA 的FHE Protocol** 全同态加密协议的下一代去中心化预测市场平台。通过 **ZAMA FHE Protocol** 的先进加密技术，在区块链上实现了前所未有的隐私保护水平，让用户能够在完全保密的状态下参与市场预测。
+**ZAMA Predict** is a next-generation decentralized prediction market platform deeply integrated with **ZAMA's FHE Protocol**. Utilizing the advanced encryption technology of **ZAMA FHE Protocol**, it achieves unprecedented levels of privacy protection on the blockchain, allowing users to participate in market predictions in a completely confidential state.
 
-### 🎬 项目演示
+### 🎬 Project Demo
 
-**在线演示地址**: [https://demo.zamapredict.io](https://demo.zamapredict.io)
+**Live Demo**: [https://demo.zamapredict.io](https://demo.zamapredict.io)
 
-**视频演示**:
+**Video Demo**:
 [![ZAMA Predict Demo Video](https://img.shields.io/badge/Watch_Demo-Video-FF0000?logo=youtube)](https://youtube.com/watch?v=your-demo-video-id)
 
 
-### 🚀 快速体验
+### 🚀 Quick Start
 ```bash
-# 或使用本地开发版本
+# Or use local development version
 https://github.com/mrduck/privacy-prediction-market.git
-1.启动服务端
+1.Start backend server
 cd backend
 npm install
 node server.js
 
-2.启动frontend
+2. Start frontend
 cd frontend
 npm install 
 npx start
 
 ```
-**测试指南**:
-1. 连接Sepolia测试网
-2. 从Faucet获取测试ETH
-3. 体验完整的预测市场流程
-`
-### 🔐 隐私优先的设计理念
+**Testing Guide**:
+1. Connect to Sepolia testnet
+2. Get test ETH from Faucet
+3. Experience the complete prediction market workflow
 
-- **端到端加密**: 基于 ZAMA 的FHE Protocol协议，所有用户数据在链上进行全同态加密处理
-- **零知识证明**: 在不暴露任何信息的前提下验证交易合法性
-- **机密计算**: 在加密状态下执行智能合约逻辑，确保业务逻辑的完全隐私
-- **抗审查**: 通过密码学保证，即使节点运营商也无法获取用户敏感信息
+`
+### 🔐 Privacy-First Design Philosophy
+
+- **End-to-End Encryption**: All user data is processed with fully homomorphic encryption on-chain based on ZAMA's FHE Protocol
+- **Zero-Knowledge Proofs**: Verify transaction legitimacy without exposing any information
+- **Confidential Computing**: Execute smart contract logic in encrypted state, ensuring complete privacy of business logic
+- **Censorship Resistance**: Cryptographic guarantees ensure even node operators cannot access user sensitive information
 
 ## 🏗️ How It Works
 
-### 业务流程概览
+### Business Process Overview
+![Business Process Overview](https://blue-far-butterfly-900.mypinata.cloud/ipfs/bafkreibe4vpr34sxffh24f7qudjojypmc6bhjn2zoq4ev32mpcla5aj75e)
 
-```
-### 业务流程概览
-![业务流程](https://blue-far-butterfly-900.mypinata.cloud/ipfs/bafkreibe4vpr34sxffh24f7qudjojypmc6bhjn2zoq4ev32mpcla5aj75e)
-
-### 技术架构图
-![技术架构图](https://blue-far-butterfly-900.mypinata.cloud/ipfs/bafkreibe4vpr34sxffh24f7qudjojypmc6bhjn2zoq4ev32mpcla5aj75e)
-
-```
+### Technical Architecture Diagram
+![Technical Architecture Diagram](https://blue-far-butterfly-900.mypinata.cloud/ipfs/bafkreigenqgsi43e2ymmbbwit57evd5rvf3qz3fpcgtnpynubrkoq2wbga)
 
 ## 🛠️ Tech Stack
 
-### 📜 智能合约部分
+### 📜 Smart Contracts
 
-**开发框架 & 工具**
-- **Hardhat** - 智能合约开发框架
-- **fhevm/hardhat-plugin** - 全同态加密虚拟机插件
-- **OpenZeppelin** - 安全的合约库
-- **openzeppelin/confidential-contracts** - ERC7984合约库
-- **zama-fhe/oracle-solidity** - zama-fhe预言机
-- **@fhevm/solidity** - zama solidity库
+**Development Framework & Tools**
+- **Hardhat** - Smart contract development framework
+- **fhevm/hardhat-plugin** - Fully homomorphic encryption virtual machine plugin
+- **OpenZeppelin** - Secure contract library
+- **openzeppelin/confidential-contracts** - ERC7984 contract library
+- **zama-fhe/oracle-solidity** - Zama FHE oracle
+- **@fhevm/solidity** - Zama Solidity library
 - **...**
 
-**合约功能描述**
-- **PrivacyToken (ERC7984)**: 隐私代币管理，支持加密mint,加密burn，加密余额查询和加密转账
-- **PredictionMarket**: 市场创建、管理和投票逻辑，集成 fhevm 进行数据授权和访问
-- **PrivacyTicket**: fhevm隐私票据兑换和管理，支持加密票据操作
+**Contract Function Description**
+- **PrivacyToken (ERC7984)**: Privacy token management, supporting encrypted mint, encrypted burn, encrypted balance queries and encrypted transfers
+- **PredictionMarket**: Market creation, management and voting logic, integrated with fhevm for data authorization and access
+- **PrivacyTicket**: Fhevm privacy ticket exchange and management, supporting encrypted ticket operations
 
-### 🌐 前端部分
+### 🌐 Frontend
 
-**前端框架 & 库**
-- **React 19.2** - 用户界面框架
-- **TypeScript** - 类型安全的JavaScript
+**Frontend Framework & Libraries**
+- **React 19.2** - User interface framework
+- **TypeScript** - Type-safe JavaScript
 
-**区块链集成**
+**Blockchain Integration**
 - **@web3-react** - React Hooks for Web3
-- **zama-fhe/relayer-sdk** - 链上数据解密
+- **zama-fhe/relayer-sdk** - On-chain data decryption
 
-**功能介绍**
+**Feature Description**
 
-#### 用户中心化登录
-- **用户登录**: 中心化登录
+#### Centralized User Login
+- **User Login**: Centralized login system
 
-#### 💧 隐私代币获取
-- **测试网水龙头**: 用户可通过 Faucet 获取隐私测试代币
-- **FHE 加密余额**: 代币余额通过 ZAMA FHE 协议进行加密存储
-- **隐私交易**: 所有代币转账在加密状态下完成
+#### 💧 Privacy Token Acquisition
+- **Testnet Faucet**: Users can obtain privacy test tokens through Faucet
+- **FHE Encrypted Balances**: Token balances are encrypted and stored via ZAMA FHE protocol
+- **Private Transactions**: All token transfers are completed in encrypted state
 
-#### 🎫 隐私票据系统
-- **代币兑换**: 用户将隐私代币存入合约，换取加密隐私票据
-- **FHE 加密票据**: 票据信息通过全同态加密技术保护
-- **匿名持仓**: 用户持仓情况在链上完全加密
+#### 🎫Privacy Ticket System
+- **Token Exchange**: Users deposit privacy tokens into contracts in exchange for encrypted privacy tickets
+- **FHE Encrypted Tickets**: Ticket information protected by fully homomorphic encryption technology
+- **Anonymous Holdings**: User holding positions are fully encrypted on-chain
 
-#### 📊 去中心化市场
-- **市场创建**: 用户可创建基于 FHE 协议的预测市场
-- **隐私参数**: 市场参数和规则通过加密方式存储
-- **抗审查**: 基于 ZAMA 协议，确保市场创建的完全去中心化
+#### 📊 Decentralized Market
+- **Market Creation**: Users can create prediction markets based on FHE protocol
+- **Privacy Parameters**: Market parameters and rules stored via encryption
+- **Censorship Resistance**: Based on ZAMA protocol, ensuring completely decentralized market creation
 
-#### 📈 加密数据可视化
-- **隐私图表**: 市场数据通过 FHE 协议处理后可视化展示
-- **加密分析**: 所有分析计算在加密数据上执行
-- **机密洞察**: 为用户提供有价值的市场洞察，同时保护数据隐私
+#### 📈 Encrypted Data Visualization
+- **Privacy Charts**: Market data visualized after processing through FHE protocol
+- **Encrypted Analysis**: All analytical computations performed on encrypted data
+- **Confidential Insights**: Providing valuable market insights to users while protecting data privacy
 
-#### 🗳️ 全同态加密投票
-- **隐私投票**: 用户使用隐私票据进行完全匿名的预测投票
-- **FHE 计票**: 投票统计在全同态加密状态下完成
-- **可验证结果**: 在保持隐私的同时确保结果的可验证性
+#### 🗳️ Fully Homomorphic Encrypted Voting
+- **Private Voting**: Users use privacy tickets for completely anonymous prediction voting
+- **FHE Vote Counting**: Vote tallying completed in fully homomorphic encrypted state
+- **Verifiable Results**: Ensuring result verifiability while maintaining privacy
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: 基础功能完善 (当前)
-- ✅ 集成 ZAMA FHE Protocol 基础框架
-- ✅ 隐私代币和票据系统
-- ✅ 基础预测市场创建功能
-- ✅ 加密投票机制
+### Phase 1: Core Features (Current)
+- ✅  Integrated ZAMA FHE Protocol foundation
+- ✅ Privacy token and ticket system
+- ✅ Basic prediction market creation
+- ✅ Encrypted voting mechanism
 
-### Phase 2: 隐私增强 (Q1 2026)
-- 🔄 **用户身份隐私保护**
-    - 零知识证明身份验证
-    - 去中心化身份管理系统
-    - 匿名凭证系统
-- 🔄 **增强数据隐私**
-    - 多方安全计算集成
-    - 差分隐私保护
-    - 隐私数据生命周期管理
+### Phase 2: Privacy Enhancement (Q1 2026)
+- 🔄 **User Identity Privacy Protection**
+    - Zero-knowledge proof authentication
+    - ecentralized identity management system
+    - Anonymous credential system
+- 🔄 **Enhanced Data Privacy**
+    - Multi-party secure computation integration
+    - Differential privacy protection
+    - Privacy data lifecycle management
 
-### Phase 3: 预言机系统升级 (Q3 2026)
-- ⏳ **去中心化预言机网络**
-    - 多数据源聚合验证
-    - 抗操纵的结果提交机制
-    - 经济激励机制
-- ⏳ **隐私保护预言机**
-    - FHE 加密数据喂价
-    - 隐私保护的数据获取
-    - 可验证的随机函数
+### Phase 3: Oracle System Upgrade (Q3 2026)
+- ⏳ **Decentralized Oracle Network**
+    - Multi-source data aggregation verification
+    - Anti-manipulation result submission mechanism
+    - Economic incentive mechanism
+- ⏳ **Privacy-Preserving Oracle**
+    - FHE encrypted data feeds
+    - Privacy-protected data acquisition
+    - Verifiable random functions
 
 ## 🙏 Acknowledgments
-衷心感谢 ZAMA FHE Protocol团队和社区成员的辛勤工作和无私奉献。正是有了你们的支持，ZAMA Predict 才能够实现如此高水平的隐私保护功能。
+Sincere thanks to the ZAMA FHE Protocol team and community members for their hard work and selfless contributions. It is with your support that ZAMA Predict can achieve such high levels of privacy protection functionality.
 
-**特别鸣谢**：[https://www.zama.ai/](https://community.zama.ai/) 开发团队及所有社区贡献者！
+**Special Thanks**：[https://www.zama.ai/](https://community.zama.ai/) development team and all community contributors!
 
 
 
