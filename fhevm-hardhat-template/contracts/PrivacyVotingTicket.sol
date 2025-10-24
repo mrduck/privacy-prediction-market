@@ -223,7 +223,7 @@ contract PrivacyVoteTicket is SepoliaConfig, Ownable2Step, AccessControl, IPriva
 
     function addVotingNote(address to, euint64 encryptedAmount) external onlyRole(ADDER_ROLE) override returns (euint64){
         require(to != address(0), "Invalid recipient"); // 明文地址可正常用require
-
+        require(FHE.isSenderAllowed(encryptedAmount), "Unauthorized access to encrypted amount.");
         // 1. 确认合约对加密金额的所有权（核心：避免权限错误）
         FHE.allowThis(encryptedAmount);
         FHE.allow(encryptedAmount, address(this));
