@@ -79,10 +79,18 @@ npx start
 - **@fhevm/solidity** - Zama Solidity library
 - **...**
 
+**ContractInfo**
+
+| name             | address        | scan    |
+|------------------|----------------|--------|
+| PrivacyToken     | 0x0892d63C1bc130d39A129a23696f87dDd763cEb4  | https://sepolia.etherscan.io/address/0x0892d63C1bc130d39A129a23696f87dDd763cEb4 |
+| PredictionMarket | 0x0babE07D6C6aCaa7d9E9C18D59bf4324172468e0    | https://sepolia.etherscan.io/address/0x0babE07D6C6aCaa7d9E9C18D59bf4324172468e0 |
+| PrivacyTicket    | 0x88d458415D2110f8ec373De5Ac1878b837BE900a| https://sepolia.etherscan.io/address/0x88d458415D2110f8ec373De5Ac1878b837BE900a |
+
 **Contract Function Description**
-- **PrivacyToken (ERC7984)**: Privacy token management, supporting encrypted mint, encrypted burn, encrypted balance queries and encrypted transfers
-- **PredictionMarket**: Market creation, management and voting logic, integrated with fhevm for data authorization and access
-- **PrivacyTicket**: Fhevm privacy ticket exchange and management, supporting encrypted ticket operations
+- **PrivacyToken (ERC7984)**: Base ACL Privacy token management, supporting encrypted mint, encrypted burn, encrypted balance queries and encrypted transfers
+- **PredictionMarket**: BASE ACL Market creation, management and voting logic, integrated with fhevm for data authorization and access
+- **PrivacyTicket**: BASE ACL Fhevm privacy ticket exchange and management, supporting encrypted ticket operations
 
 ### 🌐 Frontend
 
