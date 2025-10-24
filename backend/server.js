@@ -2,20 +2,20 @@
 const express = require('express');
 const db = require('./db');
 const { ethers } = require('ethers');
-// backend/server.js（新增内容）
+// backend/server.js (Added Content)
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const cors = require('cors'); // 引入 cors
+const cors = require('cors'); // Import cors
 const authMiddleware = require('./middleware/auth');
 const path = require('path');
 const fs = require('fs');
-const JWT_SECRET = 'zama_president_key'; // 生产环境需更换为强密钥
-const JWT_EXPIRES_IN = '7d'; // token 有效期 7 天
+const JWT_SECRET = 'zama_president_key'; // Replace with a strong secret in production
+const JWT_EXPIRES_IN = '7d'; // Token validity period: 7 days
 
 const app = express();
 const PORT = 3001;
 
-// 🔴 在这里添加 multer 配置
+// 🔴 Add multer configuration here
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '..', 'public', 'uploads', 'market-covers');
@@ -30,23 +30,23 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 🔥 配置 CORS：允许 localhost:3000 跨域请求
+// 🔥 Configure CORS: Allow cross-origin requests from localhost:3000
 app.use(cors({
-  origin: 'http://localhost:3000', // 前端运行的域名+端口
-  methods: ['GET', 'POST'], // 允许的 HTTP 方法
-  credentials: true, // 允许携带凭证（如 cookies）
+  origin: 'http://localhost:3000', // Domain + port where the frontend is running
+  methods: ['GET', 'POST'], // Allowed HTTP methods
+  credentials: true, // Allow credentials (e.g., cookies)
 }));
 
 app.use(express.json());
 
 const userRouter = require('./routes/user');
-app.use('/api/user', userRouter); // 所有 /api/user 的请求由 userRouter 处理
+app.use('/api/user', userRouter); // All requests to /api/user are handled by userRouter
 
-// 接口 1：添加用户（POST 请求）
+// API 1: Add User (POST Request)
 app.post('/api/users', (req, res) => {
   const { walletAddress, nickname } = req.body;
   if (!walletAddress || !nickname) {
-    return res.status(400).json({ error: '钱包地址和昵称不能为空' });
+    return res.status(400).json({ error: 'Wallet address and nickname cannot be empty' });
   }
 
   db.user.add(walletAddress, nickname, (err, userId) => {
@@ -57,7 +57,7 @@ app.post('/api/users', (req, res) => {
   });
 });
 
-// 接口 2：查询用户（GET 请求）
+// API 2: Get User (GET Request)
 app.get('/api/users/:walletAddress', (req, res) => {
   const walletAddress = req.params.walletAddress;
   db.user.getByWallet(walletAddress, (err, user) => {
@@ -65,7 +65,7 @@ app.get('/api/users/:walletAddress', (req, res) => {
       return res.status(500).json({ error: err.message });
     }
     if (!user) {
-      return res.status(404).json({ error: '用户不存在' });
+      return res.status(404).json({ error: 'User does not exist' });
     }
     res.json({ success: true, user });
   });
@@ -74,25 +74,25 @@ app.get('/api/users/:walletAddress', (req, res) => {
 app.get('/api/get-nonce', (req, res) => {
   const { walletAddress } = req.query;
 
-  // 参数校验失败：返回 success: false + 错误信息
+  // Parameter validation failed: Return success: false + error message
   if (!walletAddress) {
     return res.json({
       success: false,
-      error: '钱包地址不能为空'
+      error: 'Wallet address cannot be empty'
     });
   }
 
-  // 生成并存储 nonce
+  // Generate and store nonce
   db.nonce.create(walletAddress, (err, data) => {
-    // 数据库/业务错误：返回 success: false + 错误信息
+    // Database/business error: Return success: false + error message
     if (err) {
       return res.json({
         success: false,
-        error: '生成 nonce 失败'
+        error: 'Failed to generate nonce'
       });
     }
 
-    // 成功响应：按照前端预期格式返回（success: true + data 包裹）
+    // Successful response: Return in the format expected by the frontend (wrapped in success: true + data)
     res.json({
       success: true,
       data: {
@@ -104,45 +104,45 @@ app.get('/api/get-nonce', (req, res) => {
   });
 });
 
-// 接口 4：验证签名并生成 token（POST）
+// API 4: Verify Signature and Generate Token (POST)
 app.post('/api/verify-signature', async (req, res) => {
   const { address, signature, nonce, chainId } = req.body;
-  console.log('------------------- 签名验证参数 -------------------');
-  console.log('接收的address:', address);
-  console.log('接收的signature:', signature);
-  console.log('接收的nonce:', nonce);
-  console.log('接收的chainId:', chainId);
+  console.log('------------------- Signature Verification Parameters -------------------');
+  console.log('Received address:', address);
+  console.log('Received signature:', signature);
+  console.log('Received nonce:', nonce);
+  console.log('Received chainId:', chainId);
 
-  // 1. 参数校验（失败：统一返回 success: false + error）
+  // 1. Parameter validation (Failed: Uniformly return success: false + error)
   if (!address || !signature || !nonce || !chainId) {
     return res.json({
       success: false,
-      error: '参数不完整（address/signature/nonce/chainId）'
+      error: 'Incomplete parameters (address/signature/nonce/chainId)'
     });
   }
 
   try {
-    // 2. 查询有效的nonce
+    // 2. Query valid nonce
     db.nonce.getValid(address, nonce, async (err, nonceRecord) => {
-      // 数据库查询失败
+      // Database query failed
       if (err) {
-        console.error('查询nonce失败:', err);
+        console.error('Failed to query nonce:', err);
         return res.json({
           success: false,
-          error: '查询nonce失败'
+          error: 'Failed to query nonce'
         });
       }
 
-      // nonce无效（不存在/已过期/已使用）
+      // Invalid nonce (does not exist/expired/used)
       if (!nonceRecord) {
-        console.error('无效的nonce：不存在/已使用/已过期');
+        console.error('Invalid nonce: Does not exist/used/expired');
         return res.json({
           success: false,
-          error: '无效的nonce（可能已过期或已使用）'
+          error: 'Invalid nonce (may be expired or used)'
         });
       }
 
-      // 3. 拼装签名消息
+      // 3. Assemble signature message
       const message = [
         `ZamaPredict wants you to sign in with your Ethereum account:`,
         address,
@@ -156,68 +156,68 @@ app.post('/api/verify-signature', async (req, res) => {
         `Expiration Time: ${new Date(nonceRecord.expiresAt).toISOString()}`
       ].join('\n');
 
-      console.log('\n------------------- 后端拼装的签名消息 -------------------');
+      console.log('\n------------------- Signature Message Assembled by Backend -------------------');
       console.log(message);
       console.log('--------------------------------------------------------\n');
 
-      // 4. 验证签名
+      // 4. Verify signature
       try {
         const recoveredAddress = ethers.verifyMessage(message, signature);
-        console.log('签名验证得到的地址:', recoveredAddress);
-        console.log('原始地址（小写）:', address.toLowerCase());
-        console.log('验证地址是否匹配:', recoveredAddress.toLowerCase() === address.toLowerCase());
+        console.log('Address obtained from signature verification:', recoveredAddress);
+        console.log('Original address (lowercase):', address.toLowerCase());
+        console.log('Verify if addresses match:', recoveredAddress.toLowerCase() === address.toLowerCase());
 
-        // 签名地址不匹配
+        // Signature address mismatch
         if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
-          console.error('签名验证失败：地址不匹配');
+          console.error('Signature verification failed: Address mismatch');
           return res.json({
             success: false,
-            error: '签名验证失败（地址不匹配）'
+            error: 'Signature verification failed (address mismatch)'
           });
         }
 
-        // 5. 标记nonce为已使用
+        // 5. Mark nonce as used
         db.nonce.markAsUsed(nonceRecord.id, (err) => {
-          // 标记nonce失败
+          // Failed to mark nonce
           if (err) {
-            console.error('标记nonce失败:', err);
+            console.error('Failed to mark nonce as used:', err);
             return res.json({
               success: false,
-              error: '标记nonce失败'
+              error: 'Failed to mark nonce as used'
             });
           }
 
           db.user.getByWallet(address, (userErr, existingUser) => {
             if (userErr) {
-              console.error('查询用户失败:', userErr);
-              return res.json({ success: false, error: '查询用户失败' });
+              console.error('Failed to query user:', userErr);
+              return res.json({ success: false, error: 'Failed to query user' });
             }
 
-            // 5.1 若用户不存在，创建新用户
+            // 5.1 If user does not exist, create a new user
             if (!existingUser) {
-              const nickname = `user_${address.slice(0, 6)}`; // 生成默认昵称
+              const nickname = `user_${address.slice(0, 6)}`; // Generate default nickname
               db.user.add(address, nickname, (addErr, newUser) => {
                 if (addErr) {
-                  console.error('创建用户失败:', addErr);
-                  return res.json({ success: false, error: '创建用户失败' });
+                  console.error('Failed to create user:', addErr);
+                  return res.json({ success: false, error: 'Failed to create user' });
                 }
-                // 创建成功后生成Token
+                // Generate Token after successful creation
                 const token = jwt.sign({ walletAddress: address }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-                console.log('用户创建成功，生成Token:', token);
+                console.log('User created successfully, generated Token:', token);
                 res.json({
                   success: true,
-                  data: {  // 关键：将结果包裹在 data 中
+                  data: {  // Key: Wrap result in data
                     token,
                     user: { walletAddress: address }
                   }
                 });
               });
-            }else {
+            } else {
               const token = jwt.sign({ walletAddress: address }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-              console.log('用户创建成功，生成Token:', token);
+              console.log('User created successfully, generated Token:', token);
               res.json({
                 success: true,
-                data: {  // 关键：将结果包裹在 data 中
+                data: {  // Key: Wrap result in data
                   token,
                   user: { walletAddress: address }
                 }
@@ -227,108 +227,108 @@ app.post('/api/verify-signature', async (req, res) => {
         });
 
       } catch (verifyErr) {
-        // 签名验证过程报错（格式错误等）
-        console.error('签名验证过程报错:', verifyErr);
+        // Error during signature verification (format error, etc.)
+        console.error('Error during signature verification:', verifyErr);
         return res.json({
           success: false,
-          error: '签名验证失败（格式错误或无效签名）'
+          error: 'Signature verification failed (invalid format or signature)'
         });
       }
     });
   } catch (error) {
-    // 整体流程报错
-    console.error('整体流程报错:', error);
+    // Error in overall process
+    console.error('Error in overall process:', error);
     res.json({
       success: false,
-      error: '验证签名失败'
+      error: 'Failed to verify signature'
     });
   }
 });
 
-// 1. 先添加 JWT 验证中间件（确保只有登录用户能创建市场）
+// 1. First add JWT authentication middleware (ensure only logged-in users can create markets)
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-  if (!token) return res.status(401).json({ error: '未登录' });
+  if (!token) return res.status(401).json({ error: 'Not logged in' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'token无效' });
-    req.user = user; // 将用户信息（walletAddress）挂载到req
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user; // Attach user information (walletAddress) to req
     next();
   });
 };
 
 app.post('/api/create-market', authenticateToken, upload.single('cover'), (req, res) => {
   const { title, description, category, endTime, options } = req.body;
-  const creatorAddress = req.user.walletAddress; // 从token中获取创建者地址
+  const creatorAddress = req.user.walletAddress; // Get creator address from token
 
-  // 验证必填字段
+  // Verify required fields
   if (!title || !category || !endTime || options.length < 2) {
-    return res.status(400).json({ error: '必填字段缺失（标题/分类/结束时间/至少2个选项）' });
+    return res.status(400).json({ error: 'Required fields missing (title/category/end time/at least 2 options)' });
   }
 
   db.market.checkTitle(title, (err, exists) => {
     if (err) {
-      console.error('查询标题重复失败：', err);
-      return res.status(500).json({error: '服务器错误'});
+      console.error('Failed to check for duplicate titles:', err);
+      return res.status(500).json({ error: 'Server error' });
     }
 
-    // 若标题已存在，直接返回错误
+    // If title already exists, return error directly
     if (exists) {
-      return res.status(400).json({error: '该市场标题已存在，请更换标题'});
+      return res.status(400).json({ error: 'This market title already exists, please change the title' });
     }
 
-    // 处理封面 URL：上传成功则生成访问路径，否则为 null
+    // Process cover URL: Generate access path if upload is successful, otherwise null
     let coverUrl = null;
     if (req.file) {
-      coverUrl = `/uploads/market-covers/${req.file.filename}`; // 前端可访问的相对路径
+      coverUrl = `/uploads/market-covers/${req.file.filename}`; // Relative path accessible by frontend
     }
 
-    // 调用db方法创建市场
+    // Call db method to create market
     db.market.create({
       title,
       description,
       creatorAddress,
       category,
-      endTime, // 传递结束时间
+      endTime, // Pass end time
       options,
-      coverUrl // 新增封面地址字段
+      coverUrl // New cover address field
     }, (err, marketId) => {
-      if (err) return res.status(500).json({ error: '创建市场失败' });
-      res.json({ success: true, data:{marketId:marketId} });
+      if (err) return res.status(500).json({ error: 'Failed to create market' });
+      res.json({ success: true, data: { marketId: marketId } });
     });
   });
 });
 
 app.get('/api/markets', (req, res) => {
-  // 从查询参数获取分页信息（默认第1页，每页10条）
+  // Get pagination information from query parameters (default: page 1, 10 items per page)
   const { page = 1, limit = 10 } = req.query;
 
-  // 先查询总条数，再查询当前页数据
+  // First query total count, then query current page data
   db.market.getTotalCount((countErr, totalCount) => {
     if (countErr) {
-      return res.status(500).json({ error: '查询市场总数失败' });
+      return res.status(500).json({ error: 'Failed to query total number of markets' });
     }
 
-    // 查询当前页数据
+    // Query current page data
     db.market.getList(page, limit, (err, markets) => {
       if (err) {
-        return res.status(500).json({ error: '查询市场列表失败' });
+        return res.status(500).json({ error: 'Failed to query market list' });
       }
 
-      // 计算总页数
+      // Calculate total pages
       const totalPages = Math.ceil(totalCount / limit);
 
-      // 返回分页数据
+      // Return pagination data
       res.json({
         success: true,
         data: {
-          markets, // 当前页市场列表
+          markets, // Current page market list
           pagination: {
             page: parseInt(page, 10),
             limit: parseInt(limit, 10),
-            totalCount, // 总条数
-            totalPages // 总页数
+            totalCount, // Total number of items
+            totalPages // Total number of pages
           }
         }
       });
@@ -337,98 +337,98 @@ app.get('/api/markets', (req, res) => {
 });
 
 userRouter.get('/', authMiddleware, (req, res) => {
-  // authMiddleware 会将用户信息挂载到 req.user
+  // authMiddleware attaches user information to req.user
   res.json({
     success: true,
     data: {
-      walletAddress: req.user.walletAddress, // 假设用户表存储了钱包地址
+      walletAddress: req.user.walletAddress, // Assume user table stores wallet address
     },
   });
 });
 
 app.get('/api/market/:id/positions', (req, res) => {
-  const { id: marketId } = req.params; // 从路由参数取市场ID
-  const { userId } = req.query; // 从查询参数取用户钱包地址（如 ?userId=0x...）
+  const { id: marketId } = req.params; // Get market ID from route parameters
+  const { userId } = req.query; // Get user wallet address from query parameters (e.g., ?userId=0x...)
 
-  // 参数校验
+  // Parameter validation
   if (!marketId || !userId) {
-    return res.status(400).json({ error: '缺少参数：marketId 或 userId' });
+    return res.status(400).json({ error: 'Missing parameters: marketId or userId' });
   }
 
-  // 调用 db.js 的 getUserPositions 方法
+  // Call getUserPositions method from db.js
   db.marketDetail.getUserPositions(marketId, userId, (err, positions) => {
     if (err) {
-      console.error('获取持仓失败:', err);
-      return res.status(500).json({ error: '获取持仓数据失败' });
+      console.error('Failed to get positions:', err);
+      return res.status(500).json({ error: 'Failed to get position data' });
     }
-    // 成功返回持仓数据
+    // Return position data on success
     res.json({
       success: true,
-      data: positions // 格式：[{ optionLabel: "选项1", totalAmount: 100 }, ...]
+      data: positions // Format: [{ optionLabel: "Option 1", totalAmount: 100 }, ...]
     });
   });
 });
 
-// 新增：用户下注接口（POST方法，提交投注数据）
+// Added: User Bet API (POST method, submit bet data)
 app.post('/api/market/bet', (req, res) => {
-  // 从请求体中获取投注数据
+  // Get bet data from request body
   const { marketId, optionId, userId, betAmount } = req.body;
 
-  console.log(`投注参数:${marketId}|${optionId}|${betAmount}|${userId}`);
-  // 1. 参数校验（确保必要字段存在）
+  console.log(`Bet parameters:${marketId}|${optionId}|${betAmount}|${userId}`);
+  // 1. Parameter validation (ensure necessary fields exist)
   if (!marketId || !optionId || !userId || !betAmount) {
     return res.status(400).json({
-      error: '缺少参数：marketId、optionId、userId、betAmount 为必填项'
+      error: 'Missing parameters: marketId, optionId, userId, and betAmount are required'
     });
   }
 
-  // 校验投注金额是否为正数
+  // Verify bet amount is positive
   if (parseFloat(betAmount) <= 0) {
-    return res.status(400).json({ error: '投注金额必须大于0' });
+    return res.status(400).json({ error: 'Bet amount must be greater than 0' });
   }
 
-  // 2. 调用 db.js 的 placeBet 方法处理下注逻辑
+  // 2. Call placeBet method from db.js to process bet logic
   db.marketDetail.placeBet(
       { marketId, optionId, userId, betAmount },
       (err, result) => {
         if (err) {
-          // 处理具体错误（如余额不足）
-          const errorMsg = err.message === '余额不足'
-              ? '投注失败：余额不足，请先充值'
-              : '服务器处理失败，请稍后重试';
-          console.error('下注失败:', err);
+          // Handle specific errors (e.g., insufficient balance)
+          const errorMsg = err.message === 'Insufficient balance'
+              ? 'Bet failed: Insufficient balance, please recharge first'
+              : 'Server processing failed, please try again later';
+          console.error('Bet failed:', err);
           return res.status(500).json({ error: errorMsg });
         }
 
-        // 3. 成功响应（返回投注ID）
+        // 3. Successful response (return bet ID)
         res.json({
           success: true,
-          message: '投注成功',
+          message: 'Bet successful',
           data: { betId: result.betId }
         });
       }
   );
 });
 
-// 新增1：获取市场详情（含选项、概率、市值）
+// Added 1: Get Market Details (including options, probabilities, market cap)
 app.get('/api/market/:id/detail', (req, res) => {
-  const { id: marketId } = req.params; // 从路由参数取市场ID
+  const { id: marketId } = req.params; // Get market ID from route parameters
   console.log(`market detail id: ${marketId}`);
-  // 参数校验
+  // Parameter validation
   if (!marketId) {
-    return res.status(400).json({ error: '缺少参数：marketId' });
+    return res.status(400).json({ error: 'Missing parameter: marketId' });
   }
 
-  // 调用 db.js 的 marketDetail.getById 方法
+  // Call getById method from db.marketDetail
   db.marketDetail.getById(marketId, (err, market) => {
     if (err) {
-      console.error('获取市场详情失败:', err);
-      return res.status(500).json({ error: '获取市场详情失败' });
+      console.error('Failed to get market details:', err);
+      return res.status(500).json({ error: 'Failed to get market details' });
     }
     if (!market) {
-      return res.status(404).json({ error: '市场不存在' });
+      return res.status(404).json({ error: 'Market does not exist' });
     }
-    // 成功返回市场详情（含选项、概率、市值）
+    // Return market details on success (including options, probabilities, market cap)
     res.json({
       success: true,
       data: market
@@ -436,22 +436,22 @@ app.get('/api/market/:id/detail', (req, res) => {
   });
 });
 
-// 新增2：获取市场每日交易量（用于K线图）
+// Added 2: Get Market Daily Trading Volume (for K-line chart)
 app.get('/api/market/:id/daily-volume', (req, res) => {
-  const { id: marketId } = req.params; // 从路由参数取市场ID
+  const { id: marketId } = req.params; // Get market ID from route parameters
 
-  // 参数校验
+  // Parameter validation
   if (!marketId) {
-    return res.status(400).json({ error: '缺少参数：marketId' });
+    return res.status(400).json({ error: 'Missing parameter: marketId' });
   }
 
-  // 调用 db.js 的 marketDetail.getDailyVolume 方法
+  // Call getDailyVolume method from db.marketDetail
   db.marketDetail.getDailyVolume(marketId, (err, volumeData) => {
     if (err) {
-      console.error('获取每日交易量失败:', err);
-      return res.status(500).json({ error: '获取交易量数据失败' });
+      console.error('Failed to get daily trading volume:', err);
+      return res.status(500).json({ error: 'Failed to get trading volume data' });
     }
-    // 成功返回每日交易量数据
+    // Return daily trading volume data on success
     res.json({
       success: true,
       data: volumeData
@@ -460,24 +460,24 @@ app.get('/api/market/:id/daily-volume', (req, res) => {
 });
 
 app.get('/api/user/me', authMiddleware, (req, res) => {
-  const walletAddress = req.user.walletAddress; // authMiddleware 已将用户信息挂载到 req.user
+  const walletAddress = req.user.walletAddress; // authMiddleware attaches user info to req.user
   console.log(`get user info :${walletAddress}`);
-  // 调用 db.user.getByWallet 查询用户
+  // Call db.user.getByWallet to query user
   db.user.getByWallet(walletAddress, (err, user) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
     if (!user) {
-      return res.status(404).json({ error: '用户不存在' });
+      return res.status(404).json({ error: 'User does not exist' });
     }
     res.json({ success: true, data: user });
   });
 });
 
-app.get("/api/market/:id/top-holders", (req, res) =>{
+app.get("/api/market/:id/top-holders", (req, res) => {
   const marketId = req.params.id;
-  const page = parseInt(req.query.page) || 1; // 默认第 1 页
-  const limit = parseInt(req.query.limit) || 10; // 默认每页 10 条
+  const page = parseInt(req.query.page) || 1; // Default: Page 1
+  const limit = parseInt(req.query.limit) || 10; // Default: 10 items per page
 
   db.holder.topHolder(marketId, page, limit, (err, rows) => {
     if (err) {
@@ -486,21 +486,21 @@ app.get("/api/market/:id/top-holders", (req, res) =>{
 
     db.getTopHoldersTotal(marketId, (totalErr, total) => {
       if (totalErr) {
-        console.error('获取总条数失败:', totalErr);
+        console.error('Failed to get total count:', totalErr);
       }
-    // 返回分页数据 + 分页元信息（便于前端展示）
+      // Return pagination data + pagination meta info (for frontend display)
       res.json({
-          success: true,
-          data: rows,
-          page,
-          limit,
-          total: total || 0 /* 可选：查询总条数，需额外 SQL */
-        });
+        success: true,
+        data: rows,
+        page,
+        limit,
+        total: total || 0 /* Optional: Query total count (requires additional SQL) */
+      });
     });
   });
 })
 
 
 app.listen(PORT, () => {
-  console.log(`🚀 后端服务启动成功：http://localhost:${PORT}`);
+  console.log(`🚀 Backend service started successfully: http://localhost:${PORT}`);
 });
