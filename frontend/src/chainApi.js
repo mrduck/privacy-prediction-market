@@ -1,4 +1,5 @@
 // chainApi.js - 封装与链上合约交互的方法（替代原api.js中从sqlite读取的逻辑）
+/* global BigInt */
 import { ethers } from 'ethers';
 
 // -------------------------- 链上配置（需与你的合约和网络匹配）--------------------------
@@ -691,21 +692,23 @@ export async function getNoteBalance() {
         );
 
         // 调用合约方法获取加密余额（euint64）
-        const encryptedBalance = await votingContract.getVotingNoteBalance(userAddress);
-        console.log(`获取投票余额:${encryptedBalance}`);
+        const iface = new ethers.Interface(VOTE_ABI);
+        const callData = iface.encodeFunctionData('getVotingNoteBalance',[userAddress]);
+        // const encryptedBalance = await votingContract.getVotingNoteBalance(userAddress);
+        console.log(`获取投票余额:${callData}`);
         // 注意：加密余额需要用 FHE 客户端库解密
         // 示例（需结合 @fhevm/client）：
         // const decryptedBalance = await fheClient.decrypt(encryptedBalance);
         // return Number(decryptedBalance);
 
-        return encryptedBalance; // 未解密的原始加密数据（bytes）
+        return callData; // 未解密的原始加密数据（bytes）
     } catch (error) {
         console.error("查询票据余额失败：", error);
         throw error;
     }
 }
 
-export const getTokenBalance = async () => {
+export const getTokenBalance = async (zamaInstance) => {
     try {
         // 1. 连接 provider（只读操作无需 signer，用 provider 更轻量）
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -725,6 +728,64 @@ export const getTokenBalance = async () => {
             data: callData             // 手动编码的调用数据
         });
         console.log("合约返回的原始加密密文：", encryptedBalanceBytes);
+
+        const keypair = zamaInstance.generateKeypair();
+        console.log("生成密钥对：", {
+            publicKey: keypair.publicKey.slice(0, 20) + "...",
+            privateKey: keypair.privateKey.slice(0, 20) + "..."
+        });
+
+        const handleContractPairs = [
+            {
+                handle: encryptedBalanceBytes,
+                contractAddress: PRIVACY_TOKEN_ADDRESS,
+            },
+        ];
+
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString(); // 秒级时间戳
+        const durationDays = '10'; // 有效期10天（字符串格式）
+        const contractAddresses = [PRIVACY_TOKEN_ADDRESS];
+
+        const eip712 = zamaInstance.createEIP712(
+            keypair.publicKey,
+            contractAddresses,
+            startTimeStamp,
+            durationDays,
+        );
+        console.log("生成EIP712数据：", eip712);
+
+        // 8. 用钱包签名（注意类型指定为UserDecryptRequestVerification）
+        // const signature = await signer.signTypedData(
+        //     eip712.domain,
+        //     {
+        //         UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+        //     },
+        //     eip712.message,
+        // );
+        // console.log("签名结果：", signature.slice(0, 20) + "...");
+
+        // 9. 调用userDecrypt解密（移除签名的0x前缀，与你的代码一致）
+        // const result = await zamaInstance.userDecrypt(
+        //     handleContractPairs,
+        //     keypair.privateKey,
+        //     keypair.publicKey,
+        //     signature.replace('0x', ''), // 移除0x前缀
+        //     contractAddresses,
+        //     userAddress, // signer.address即当前用户地址
+        //     startTimeStamp,
+        //     durationDays,
+        // );
+        //
+        // // 10. 提取解密结果
+        // const decryptedValue = result[encryptedBalanceBytes];
+        // if (decryptedValue === undefined) {
+        //     throw new Error("解密结果为空，可能密文无效或无权限");
+        // }
+
+        // 11. 格式化结果（假设18位小数，根据你的代币调整）
+        // const readableValue = ethers.formatUnits(BigInt(decryptedValue), 18);
+        // console.log("解密原始值：", decryptedValue);
+        // console.log("可读余额：", readableValue);
         // const instance = await init();
         // const instance = await createInstance(SepoliaConfig);
         // console.log(`relayer instan:${instance}`);
@@ -736,7 +797,7 @@ export const getTokenBalance = async () => {
         // console.log(`解密金额:${decryptBalance}`);
         // const fhe = await init();
         // console.log(`fhe init compile`);
-        return 0;
+        return callData;
         // 4. 解密（使用 Zama 实例）
         // const relayer = await getZamaInstance();
         // const decrypted = await relayer.userDecrypt({

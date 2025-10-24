@@ -12,6 +12,26 @@ const RechargePage = () => {
     const [userBalance, setUserBalance] = useState(0); // 用户的代币余额
     const [isLoadingBalance, setIsLoadingBalance] = useState(false); // 余额加载状态
 
+    const {fheInstance,fheInitStatus} = useAppContext();
+
+    useEffect(() => {
+        console.log("=== 组件当前状态 ===");
+        console.log("正在连接中：isConnecting =", isConnecting);
+        console.log("用户地址：userAddress =", userAddress);
+        console.log("Zama初始化状态：fheInitStatus =", fheInitStatus);
+        console.log("用户余额：userBalance =", userBalance);
+        console.log("兑换数量：amount =", amount);
+        console.log("余额加载中：isLoadingBalance =", isLoadingBalance);
+        console.log("按钮禁用条件：");
+        console.log("  - amount <= 0：", amount <= 0);
+        console.log("  - isConnecting：", isConnecting);
+        console.log("  - isLoadingBalance：", isLoadingBalance);
+        console.log("  - amount > userBalance：", amount > userBalance);
+        console.log("  → 最终disabled：",
+            amount <= 0 || isConnecting || isLoadingBalance || amount > userBalance
+        );
+        console.log("===================");
+    });
     // 页面加载时自动查询用户余额
     // src/pages/RechargePage.js（添加调试日志）
     useEffect(() => {
@@ -29,10 +49,17 @@ const RechargePage = () => {
     const fetchUserBalance = async () => {
         setIsLoadingBalance(true);
         try {
+            if (fheInitStatus !== "success" || !fheInstance) {
+                toast.error("Zama 实例未就绪，请等待初始化完成");
+                return;
+            }
             console.log(`开始查询用户代币余额`);
-            const balance = await getTokenBalance();
-            setUserBalance(balance);
-            setAmount(balance); // 初始默认填充全部余额
+            const balance = await getTokenBalance(fheInstance);
+            console.log(`查询全部代币余额:${balance}`);
+            // setUserBalance(balance);
+            // setAmount(balance); // 初始默认填充全部余额
+            setUserBalance(10);
+            setAmount(10); // 初始默认填充全部余额
         } catch (err) {
             toast.error(`查询余额失败：${err.message}`);
         } finally {
@@ -42,10 +69,6 @@ const RechargePage = () => {
 
     // 兑换票据逻辑
     const handleDeposit = async () => {
-        if (!isConnected) {
-            toast.error('请先连接钱包');
-            return;
-        }
         if (isConnecting || isLoadingBalance) return;
         if (amount <= 0 || amount > userBalance) {
             toast.error(`兑换数量需在 1~${userBalance} 之间`);
@@ -118,11 +141,12 @@ const RechargePage = () => {
                 <button
                     onClick={handleDeposit}
                     className={`w-full py-3 rounded text-white font-medium ${
-                        (amount <= 0 || !isConnected || isConnecting || isLoadingBalance || amount > userBalance)
+                        (amount <= 0 || isConnecting || isLoadingBalance || amount > userBalance)
                             ? 'bg-gray-500 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700'
                     }`}
-                    disabled={amount <= 0 || !isConnected || isConnecting || isLoadingBalance || amount > userBalance}
+                    disabled={amount <= 0 || isConnecting || isLoadingBalance || amount > userBalance}
+                    title={`当前disabled：${amount <= 0 || isConnecting || isLoadingBalance || amount > userBalance}`}
                 >
                     {isConnecting || isLoadingBalance ? '处理中...' : `兑换 ${amount} 票据`}
                 </button>

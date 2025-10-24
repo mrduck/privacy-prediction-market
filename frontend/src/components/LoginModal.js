@@ -45,8 +45,16 @@ const LoginModal = () => {
 
             // 2. 调用 API 获取 nonce
             const nonceData = await getNonce(address);
-            const { nonce, createdAt, expiresAt } = nonceData;
-            if (!nonce) throw new Error("获取 nonce 失败");
+            console.log(`[步骤3] nonceData 响应:`, nonceData);
+
+            // 处理响应数据结构 - 检查是否有嵌套的 data 字段
+            const actualData = nonceData.data || nonceData;
+            const { nonce, createdAt, expiresAt } = actualData;
+
+            if (!nonce) {
+                console.error("nonceData 结构:", nonceData);
+                throw new Error("获取 nonce 失败，响应数据格式不正确");
+            }
             console.log(`[步骤3] 获取到 nonce：${nonce}`);
 
             // 3. 拼装签名消息（与后端保持一致）
@@ -73,12 +81,23 @@ const LoginModal = () => {
 
             // 5. 验证签名并获取 Token
             const verifyResult = await verifySignature(address, signature, nonce, chainId);
-            console.log(`${verifyResult}`)
+            console.log(`[步骤6] 验证结果:`, verifyResult);
+
             if (verifyResult.success) {
-                localStorage.setItem("zamaToken", verifyResult.data.token); // 存储 Token
+                // 处理响应数据结构 - 检查是否有嵌套的 data 字段
+                const tokenData = verifyResult.data || verifyResult;
+                const token = tokenData.token;
+
+                if (!token) {
+                    throw new Error("获取 token 失败，响应数据格式不正确");
+                }
+
+                localStorage.setItem("zamaToken", token); // 存储 Token
                 setIsLoggedIn(true); // 更新全局登录状态
                 setIsLoginOpen(false); // 关闭弹窗
                 alert("登录成功！");
+            } else {
+                throw new Error(verifyResult.error || "登录验证失败");
             }
         } catch (error) {
             console.error("流程失败：", error);

@@ -4,6 +4,7 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import { getUser, addUser } from "../api"; // 新增：导入获取当前用户信息的接口
+import {initializeFheInstance} from "../utils/zamaIntance";
 
 // 配置连接器（支持注入式钱包：MetaMask、OKX等）
 const injectedConnector = new InjectedConnector({
@@ -45,6 +46,11 @@ export const AppProvider = ({ children }) => {
     const [signer, setSigner] = useState(null);
     const [currentEventId, setCurrentEventId] = useState(null);
     const [view, setView] = useState("list");
+
+    const [fheInstance, setFheInstance] = useState(null); // 存储 Zama 实例
+    const [fheInitStatus, setFheInitStatus] = useState('idle'); // 实例初始化状态：idle/loading/success/error
+    const [fheErrorMsg, setFheErrorMsg] = useState(null); // 实例初始化错误信息
+
 
     // 通过 token 拉取用户信息（页面加载时执行）
     useEffect(() => {
@@ -128,6 +134,50 @@ export const AppProvider = ({ children }) => {
 
         initEthers();
     }, [provider, account]);
+
+    useEffect(() => {
+        // 初始化条件：钱包已连接（account 存在）+ Zama 未初始化（fheInitStatus 为 idle）
+        if (!account || fheInitStatus !== 'idle') return;
+
+        const initZamaInstance = async () => {
+            setFheInitStatus('loading');
+            setFheErrorMsg(null);
+            try {
+                // 调用 Zama 初始化函数（需传入钱包 provider，按你的 zamaIntance.js 实际参数调整）
+                const zamaInstance = await initializeFheInstance();
+                setFheInstance(zamaInstance); // 存入 Context
+                setFheInitStatus('success');
+                console.log('✅ Zama FHEVM 实例初始化成功');
+                toast.success("Zama 隐私计算实例已就绪");
+            } catch (error) {
+                const errMsg = error instanceof Error ? error.message : "Zama 实例初始化失败";
+                setFheErrorMsg(errMsg);
+                setFheInitStatus('error');
+                console.error("Zama 初始化失败:", error);
+                toast.error(errMsg);
+            }
+        };
+
+        initZamaInstance();
+    }, [account]); // 依赖钱包地址，钱包连接成功后触发
+
+    // 4. 新增：Zama 实例重新初始化方法（供组件调用，比如初始化失败后重试）
+    const reinitZamaInstance = async () => {
+        if (fheInitStatus === 'loading') return; // 防止重复请求
+        setFheInitStatus('loading');
+        setFheErrorMsg(null);
+        try {
+            const zamaInstance = await initializeFheInstance();
+            setFheInstance(zamaInstance);
+            setFheInitStatus('success');
+            toast.success("Zama 实例重新初始化成功");
+        } catch (error) {
+            const errMsg = error instanceof Error ? error.message : "Zama 实例重新初始化失败";
+            setFheErrorMsg(errMsg);
+            setFheInitStatus('error');
+            toast.error(errMsg);
+        }
+    };
 
     // 连接钱包（原有逻辑）
     const connectWallet = async () => {
@@ -280,6 +330,11 @@ export const AppProvider = ({ children }) => {
         currentEventId,
         view,
         switchView,
+        // Zama FHEVM 新增内容
+        fheInstance, // Zama 实例（供组件调用加密/解密方法）
+        fheInitStatus, // 实例初始化状态（供组件判断是否可用）
+        fheErrorMsg, // 实例初始化错误（供组件显示错误信息）
+        reinitZamaInstance // 重新初始化方法（供组件重试）
     };
 
     return (

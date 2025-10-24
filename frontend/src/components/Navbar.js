@@ -5,6 +5,7 @@ import LoginModal from "./LoginModal";
 import { requestFaucet } from "../chainApi";
 import toast from "react-hot-toast";
 import logoImg from "../assets/Zama  DApp-logo.png";
+import { Link } from 'react-router-dom';
 const Navbar = () => {
     const navigate = useNavigate();
     const {
@@ -59,26 +60,28 @@ const Navbar = () => {
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     {/* 品牌 Logo（保持不变） */}
                     <div className="flex items-center space-x-2">
-                        <div
-                            className="w-10 h-10 rounded-lg bg-gradient-to-r from-zama-primary to-zama-secondary flex items-center justify-center p-1">
-                            {/* 用img标签显示logo */}
-                            <img
-                                src={logoImg}
-                                alt="ZamaPredict Logo"
-                                className="w-full h-full object-contain" // 确保图片适应容器，保持比例
-                            />
-                        </div>
-                        <h1 className="text-xl font-bold gradient-text">Zama<span
-                            className="text-white ml-1">Predict</span></h1>
+                        <Link to="/" className="flex items-center space-x-2">
+                            <div
+                                className="w-10 h-10 rounded-lg bg-gradient-to-r from-zama-primary to-zama-secondary flex items-center justify-center p-1">
+                                {/* 用img标签显示logo */}
+                                <img
+                                    src={logoImg}
+                                    alt="ZamaPredict Logo"
+                                    className="w-full h-full object-contain" // 确保图片适应容器，保持比例
+                                />
+                            </div>
+                            <h1 className="text-xl font-bold gradient-text">Zama<span
+                                className="text-white ml-1">Predict</span></h1>
+                        </Link>
                     </div>
 
                     {/* 桌面端导航链接（保持不变） */}
                     <nav className="hidden md:flex items-center space-x-6">
-                        <a href="#" className="nav-link">Trending</a>
                         <a href="#" className="nav-link">Politics</a>
                         <a href="#" className="nav-link">Sports</a>
-                        <a href="#" className="nav-link">Economy</a>
                         <a href="#" className="nav-link">Tech</a>
+                        <a href="#" className="nav-link">Economy</a>
+                        <a href="#" className="nav-link">Entertainment</a>
                     </nav>
 
                     {/* 登录/注册 按钮区域（核心调整：新增Faucet和充值按钮） */}

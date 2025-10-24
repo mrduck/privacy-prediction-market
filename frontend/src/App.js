@@ -10,26 +10,25 @@ import RechargePage from "./components/RechargePage";
 import {initializeFheInstance} from "./utils/zamaIntance";
 
 function App() {
-    const [initStatus, setInitStatus] = useState('loading'); // loading / success / error
-    const [errorMsg, setErrorMsg] = useState(null);
-
-    // 组件挂载后自动执行初始化（仅一次）
-    useEffect(() => {
-        const startInit = async () => {
-            try {
-                setInitStatus('loading');
-                await initializeFheInstance();
-                setInitStatus('success');
-                console.log('✅ FHEVM initialized for React!');
-                alert('init successfully');
-            } catch (error) {
-                setInitStatus('error');
-                setErrorMsg(error.message || 'initialize faild');
-            }
-        };
-
-        startInit();
-    }, []); // 空依赖数组 → 仅执行一次
+    // const { setFheInstance, setInitStatus, setErrorMsg } = useAppContext();
+    //
+    // // 组件挂载后自动执行初始化（仅一次）
+    // useEffect(() => {
+    //     const startInit = async () => {
+    //         try {
+    //             setInitStatus('loading');
+    //             const instance = await initializeFheInstance(); // 获取初始化后的实例
+    //             setFheInstance(instance); // 存入 Context，供其他组件使用
+    //             setInitStatus('success');
+    //             console.log('✅ FHEVM initialized for React!');
+    //         } catch (error) {
+    //             setInitStatus('error');
+    //             setErrorMsg(error.message || 'initialize faild');
+    //         }
+    //     };
+    //
+    //     startInit();
+    // }, [setFheInstance, setInitStatus, setErrorMsg]); // 空依赖数组 → 仅执行一次
 
     return (
         <AppWrapper>

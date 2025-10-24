@@ -33,8 +33,6 @@ const MarketDetailPage = () => {
         setIsLoginOpen
     } = useAppContext();
 
-    // 页面加载/地址/登录态变化时请求数据
-
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -51,7 +49,7 @@ const MarketDetailPage = () => {
                     categoryName: CATEGORY_MAP[marketInfo.data.category.toString()] || 'Unknown',
                 };
                 setMarket(marketData);
-
+                const currentMarket = marketData;
                 // 2. 获取每日交易量
                 let records = [];
                 try {
@@ -76,11 +74,12 @@ const MarketDetailPage = () => {
                     // 按选项索引累加交易量（用选项索引作为临时key）
                     volumeMap[date][optionIndex] = (volumeMap[date][optionIndex] || 0) + amount;
                 });
-
+                console.log(`获取每日交易量数据结束:${volumeMap}`);
+                console.log(`市场选项:${currentMarket}`,currentMarket);
                 const formattedVolume = Object.values(volumeMap).map(dateData => {
                     const item = { ...dateData };
                     // 遍历市场选项，将索引替换为选项名称
-                    market.options.forEach((optionLabel, index) => {
+                    currentMarket.options.forEach((optionLabel, index) => {
                         if (item[index] !== undefined) {
                             item[optionLabel] = item[index]; // 用选项名称作为key
                             delete item[index]; // 删除临时的索引key
@@ -89,20 +88,50 @@ const MarketDetailPage = () => {
                     return item;
                 });
                 setDailyVolume(formattedVolume);
-
+                console.log(`格式化交易量数据:${formattedVolume}`);
                 // 3. 计算用户持仓（仅当登录且有地址时）
                 if (isLoggedIn && walletAddress) {
+                    // 筛选当前用户的投票记录
                     const userVotes = records.filter(
                         record => record.voter.toLowerCase() === walletAddress.toLowerCase()
                     );
+
+                    // 累加用户的所有投注，确保每个对象都包含 userId
                     const positions = userVotes.reduce((acc, vote) => {
                         const optionIndex = Number(vote.optionIndex);
                         const amount = Number(vote.amount);
-                        acc[optionIndex] = acc[optionIndex]
-                            ? { ...acc[optionIndex], amount: acc[optionIndex].amount + amount }
-                            : { optionIndex, option: marketData.options[optionIndex] || `选项 ${optionIndex}`, amount };
+                        const optionLabel = marketData.options[optionIndex] || `选项 ${optionIndex}`;
+
+                        // 若该选项已有持仓，累加金额（保留 userId）
+                        if (acc[optionIndex]) {
+                            acc[optionIndex] = {
+                                ...acc[optionIndex],
+                                amount: acc[optionIndex].amount + amount // 累加金额
+                            };
+                        }
+                        // 若该选项无持仓，新建对象（强制包含 userId）
+                        else {
+                            acc[optionIndex] = {
+                                userId: walletAddress, // 核心：添加用户地址
+                                optionIndex: optionIndex,
+                                option: optionLabel,
+                                amount: amount
+                            };
+                        }
                         return acc;
                     }, {});
+
+                    // 若用户无任何投票记录，仍返回包含 userId 的空持仓对象
+                    if (Object.keys(positions).length === 0) {
+                        positions["empty"] = {
+                            userId: walletAddress, // 确保有用户地址
+                            option: "暂无持仓",
+                            amount: 0,
+                            optionIndex: -1 // 标记为无实际选项
+                        };
+                    }
+
+                    // 更新状态，传递给 PositionTable
                     setUserPositions(Object.values(positions));
                 }
 
@@ -136,17 +165,17 @@ const MarketDetailPage = () => {
         }
 
         try {
-            const { optionIndex, amount } = betData;
+            const {optionIndex, betAmount } = betData;
             // 验证参数有效性
             if (isNaN(optionIndex) || optionIndex < 0) {
                 throw new Error("无效的选项索引");
             }
-            if (isNaN(amount) || amount <= 0) {
+            if (isNaN(betAmount) || betAmount <= 0) {
                 throw new Error("投注金额必须为正数");
             }
 
             // 调用链上 vote 方法（正确传递参数）
-            const txHash = await vote(Number(marketId), Number(optionIndex), Number(amount));
+            const txHash = await vote(Number(marketId), Number(optionIndex), Number(betAmount));
             toast.loading(`投注交易处理中... 哈希：${txHash.slice(0, 6)}...`);
 
             // 等待交易确认后刷新数据（核心修正）

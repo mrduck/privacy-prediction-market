@@ -36,7 +36,8 @@ export const getNonce = async (walletAddress) => {
             params: { walletAddress }, // 作为查询参数传递
             needToken: false
         });
-        return response.data; // { nonce: "随机字符串" }
+        // 响应拦截器已经返回了 response.data，所以直接返回 response
+        return response; // { nonce: "随机字符串", createdAt, expiresAt }
     } catch (error) {
         console.error("获取 nonce 失败:", error.response?.data?.error || error.message);
         throw error;
@@ -52,7 +53,8 @@ export const verifySignature = async (address, signature, nonce, chainId) => {
             nonce,
             chainId
         },{needToken: false});
-        return response; // { success: true, token, user }
+        // 响应拦截器已经返回了 response.data，所以直接返回 response
+        return response; // { success: true, data: { token, user } }
     } catch (error) {
         console.error("验证签名失败:", error.response?.data?.error || error.message);
         throw error;
