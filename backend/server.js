@@ -42,6 +42,14 @@ app.use(express.json());
 const userRouter = require('./routes/user');
 app.use('/api/user', userRouter); // All requests to /api/user are handled by userRouter
 
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // API 1: Add User (POST Request)
 app.post('/api/users', (req, res) => {
   const { walletAddress, nickname } = req.body;
