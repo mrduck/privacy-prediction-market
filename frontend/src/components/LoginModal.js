@@ -59,10 +59,10 @@ const LoginModal = () => {
 
             // 3. 拼装签名消息（与后端保持一致）
             const message = [
-                "ZamaPredict wants you to sign in with your Ethereum account:",
+                "AegisPredict wants you to sign in with your Ethereum account:",
                 address,
                 "",
-                "Welcome to ZamaPredict! Sign to connect.",
+                "Welcome to AegisPredict! Sign to connect.",
                 "",
                 "Version: 1",
                 `Chain ID: ${chainId}`,
@@ -129,7 +129,7 @@ const LoginModal = () => {
                 style={{ zIndex: 999 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-xl font-bold text-gray-900 text-center mb-4">Welcome to ZamaPredict</h2>
+                <h2 className="text-xl font-bold text-gray-900 text-center mb-4">Welcome to AegisPredict</h2>
 
                 {/* 钱包列表（支持 OKX、MetaMask） */}
                 <div className="max-h-[70vh] overflow-y-auto">

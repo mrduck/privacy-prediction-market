@@ -66,7 +66,7 @@ const Navbar = () => {
                                 {/* 用img标签显示logo */}
                                 <img
                                     src={logoImg}
-                                    alt="ZamaPredict Logo"
+                                    alt="AegisPredict Logo"
                                     className="w-full h-full object-contain" // 确保图片适应容器，保持比例
                                 />
                             </div>

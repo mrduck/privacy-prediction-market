@@ -25,7 +25,7 @@ const SearchFilter = () => {
             <div className="relative w-full md:w-1/2 mb-4 md:mb-0">
                 <input
                     type="text"
-                    placeholder="Search ZamaPredict..."
+                    placeholder="Search AegisPredict..."
                     className="input-dark pl-10"
                 />
                 <i className="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
