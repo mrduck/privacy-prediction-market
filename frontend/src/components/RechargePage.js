@@ -57,10 +57,10 @@ const RechargePage = () => {
             console.log(`Start fetching user token balance`);
             const balance = await getTokenBalance(fheInstance);
             console.log(`Fetched total token balance: ${balance}`);
-            // setUserBalance(balance);
-            // setAmount(balance); // Initially fill with full balance by default
-            setUserBalance(10);
-            setAmount(10); // Initially fill with full balance by default
+            setUserBalance(balance);
+            setAmount(balance); // Initially fill with full balance by default
+            // setUserBalance(10);
+            // setAmount(10); // Initially fill with full balance by default
         } catch (err) {
             toast.error(`Failed to fetch balance: ${err.message}`);
         } finally {

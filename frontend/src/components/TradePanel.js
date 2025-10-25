@@ -6,7 +6,7 @@ import { getNoteBalance } from '../chainApi';
 
 const TradePanel = ({ market, onBet, isConnected, isConnecting }) => {
     const navigate = useNavigate();
-    const { userAddress } = useAppContext();
+    const { userAddress,fheInstance,fheInitStatus } = useAppContext();
     const { options = [] } = market || {};
 
     // State management: bet amount, selected option, note balance, balance loading state
@@ -26,9 +26,13 @@ const TradePanel = ({ market, onBet, isConnected, isConnecting }) => {
     const fetchNoteBalance = async () => {
         setIsLoadingBalance(true);
         try {
-            const balance = await getNoteBalance(userAddress);
-            // setNoteBalance(balance);
-            setNoteBalance(10);
+            if (fheInitStatus !== "success" || !fheInstance) {
+                toast.error("Zama instance not ready, please wait for initialization to complete");
+                return;
+            }
+            const balance = await getNoteBalance(fheInstance);
+            setNoteBalance(balance);
+            // setNoteBalance(10);
             console.log(`Current note balance: ${balance}`);
         } catch (err) {
             toast.error(`Failed to query note balance: ${err.message}`);
@@ -122,7 +126,7 @@ const TradePanel = ({ market, onBet, isConnected, isConnecting }) => {
             {/* 3. Amount Input Area */}
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4">
-                    <label className="text-white w-24">Bet Amount ($):</label>
+                    <label className="text-white w-24">Bet ($):</label>
                     <input
                         type="number"
                         value={amount}

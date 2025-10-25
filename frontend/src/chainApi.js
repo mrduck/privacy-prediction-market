@@ -679,7 +679,7 @@ export async function depositTokens(amount) {
     }
 }
 
-export async function getNoteBalance() {
+export async function getNoteBalance(zamaInstance) {
     try {
         if (!window.ethereum) throw new Error("Please connect wallet");
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -696,12 +696,76 @@ export async function getNoteBalance() {
         const callData = iface.encodeFunctionData('getVotingNoteBalance', [userAddress]);
         // const encryptedBalance = await votingContract.getVotingNoteBalance(userAddress);
         console.log(`Getting voting balance:${callData}`);
+
+        const encryptedBalanceBytes = await provider.call({
+            to: PRIVACY_VOTE_ADDRESS, // Contract address
+            data: callData             // Manually encoded call data
+        });
+        console.log("Raw encrypted ciphertext returned by contract:", encryptedBalanceBytes);
+
+        const keypair = zamaInstance.generateKeypair();
+        console.log("Generated key pair:", {
+            publicKey: keypair.publicKey.slice(0, 20) + "...",
+            privateKey: keypair.privateKey.slice(0, 20) + "..."
+        });
+
+        const handleContractPairs = [
+            {
+                handle: encryptedBalanceBytes,
+                contractAddress: PRIVACY_VOTE_ADDRESS,
+            },
+        ];
+
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString(); // Timestamp in seconds
+        const durationDays = '10'; // 10-day validity (string format)
+        const contractAddresses = [PRIVACY_VOTE_ADDRESS];
+
+        const eip712 = zamaInstance.createEIP712(
+            keypair.publicKey,
+            contractAddresses,
+            startTimeStamp,
+            durationDays,
+        );
+        console.log("Generated EIP712 data:", eip712);
+
+        // 8. Sign with wallet (note: specify type as UserDecryptRequestVerification)
+        const signature = await signer.signTypedData(
+            eip712.domain,
+            {
+                UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+            },
+            eip712.message,
+        );
+        console.log("Signature result:", signature.slice(0, 20) + "...");
+
+        // 9. Call userDecrypt for decryption (remove 0x prefix from signature, consistent with your code)
+        const result = await zamaInstance.userDecrypt(
+            handleContractPairs,
+            keypair.privateKey,
+            keypair.publicKey,
+            signature.replace('0x', ''), // Remove 0x prefix
+            contractAddresses,
+            userAddress, // signer.address is current user address
+            startTimeStamp,
+            durationDays,
+        );
+
+        // // 10. Extract decryption result
+        const decryptedValue = result[encryptedBalanceBytes];
+        if (decryptedValue === undefined) {
+            throw new Error("Decryption result is empty, ciphertext may be invalid or no permission");
+        }
+
+        // 11. Format result (assuming 18 decimals, adjust based on your token)
+        // const readableValue = ethers.formatUnits(BigInt(decryptedValue), 18);
+        console.log("Decrypted raw value:", decryptedValue);
         // Note: Encrypted balance needs to be decrypted with FHE client library
         // Example (requires @fhevm/client):
         // const decryptedBalance = await fheClient.decrypt(encryptedBalance);
         // return Number(decryptedBalance);
 
-        return callData; // Raw encrypted data (bytes) without decryption
+        // return callData; // Raw encrypted data (bytes) without decryption
+        return decryptedValue;
     } catch (error) {
         console.error("Failed to query note balance:", error);
         throw error;
@@ -755,36 +819,36 @@ export const getTokenBalance = async (zamaInstance) => {
         console.log("Generated EIP712 data:", eip712);
 
         // 8. Sign with wallet (note: specify type as UserDecryptRequestVerification)
-        // const signature = await signer.signTypedData(
-        //     eip712.domain,
-        //     {
-        //         UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
-        //     },
-        //     eip712.message,
-        // );
-        // console.log("Signature result:", signature.slice(0, 20) + "...");
+        const signature = await signer.signTypedData(
+            eip712.domain,
+            {
+                UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification,
+            },
+            eip712.message,
+        );
+        console.log("Signature result:", signature.slice(0, 20) + "...");
 
         // 9. Call userDecrypt for decryption (remove 0x prefix from signature, consistent with your code)
-        // const result = await zamaInstance.userDecrypt(
-        //     handleContractPairs,
-        //     keypair.privateKey,
-        //     keypair.publicKey,
-        //     signature.replace('0x', ''), // Remove 0x prefix
-        //     contractAddresses,
-        //     userAddress, // signer.address is current user address
-        //     startTimeStamp,
-        //     durationDays,
-        // );
-        //
+        const result = await zamaInstance.userDecrypt(
+            handleContractPairs,
+            keypair.privateKey,
+            keypair.publicKey,
+            signature.replace('0x', ''), // Remove 0x prefix
+            contractAddresses,
+            userAddress, // signer.address is current user address
+            startTimeStamp,
+            durationDays,
+        );
+
         // // 10. Extract decryption result
-        // const decryptedValue = result[encryptedBalanceBytes];
-        // if (decryptedValue === undefined) {
-        //     throw new Error("Decryption result is empty, ciphertext may be invalid or no permission");
-        // }
+        const decryptedValue = result[encryptedBalanceBytes];
+        if (decryptedValue === undefined) {
+            throw new Error("Decryption result is empty, ciphertext may be invalid or no permission");
+        }
 
         // 11. Format result (assuming 18 decimals, adjust based on your token)
         // const readableValue = ethers.formatUnits(BigInt(decryptedValue), 18);
-        // console.log("Decrypted raw value:", decryptedValue);
+        console.log("Decrypted raw value:", decryptedValue);
         // console.log("Readable balance:", readableValue);
         // const instance = await init();
         // const instance = await createInstance(SepoliaConfig);
@@ -797,7 +861,8 @@ export const getTokenBalance = async (zamaInstance) => {
         // console.log(`Decrypted amount:${decryptBalance}`);
         // const fhe = await init();
         // console.log(`fhe init compile`);
-        return callData;
+        // return callData;
+        return decryptedValue;
         // 4. Decrypt (using Zama instance)
         // const relayer = await getZamaInstance();
         // const decrypted = await relayer.userDecrypt({
