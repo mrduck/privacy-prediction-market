@@ -26,8 +26,9 @@
 
 **Live Demo**: [https://privacy-prediction-market-frontend.vercel.app/](https://privacy-prediction-market-frontend.vercel.app/)
 
-**Video Demo**:
-[![AegisPredict Demo Video](https://youtu.be/svAdPPnLwa4)
+[![AegisPredict Demo Video](https://blue-far-butterfly-900.mypinata.cloud/ipfs/bafkreihy5xuiokqjvxs3gfqehaeoqpujc4hkn3uiaklzbieaciiuhagdh4)](https://youtu.be/svAdPPnLwa4)
+
+📺 **Watch Demo**: [YouTube Link](https://youtu.be/svAdPPnLwa4)
 
 
 ### 🚀 Quick Start
