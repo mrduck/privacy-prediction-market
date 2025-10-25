@@ -6,7 +6,7 @@ const multer = require('multer');
 const cors = require('cors');
 const authMiddleware = require('./middleware/auth');
 const path = require('path');
-const { put } = require('@vercel/blob'); // 引入 Vercel Blob 用于文件存储
+const { put } = require('@vercel/blob');
 
 const JWT_SECRET = 'zama_president_key'; // Replace with a strong secret in production
 const JWT_EXPIRES_IN = '7d'; // Token validity period: 7 days
