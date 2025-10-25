@@ -62,8 +62,8 @@ async function initTables() {
       );
     `);
 
-    // Markets table
-    const marketsTableResult = await client.execute(`
+    // Markets table（已包含 coverUrl 字段，无需额外 ALTER）
+    await client.execute(`
       CREATE TABLE IF NOT EXISTS markets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -77,20 +77,7 @@ async function initTables() {
         coverUrl TEXT
       );
     `);
-    if (marketsTableResult.rowsAffected === 0) {
-      // If table exists, try to add coverUrl column if missing
-      try {
-        await client.execute(`
-          ALTER TABLE markets
-          ADD COLUMN coverUrl TEXT
-        `);
-        console.log('✅ Successfully added coverUrl column to markets table');
-      } catch (alterErr) {
-        console.log('⚠️ markets table already has coverUrl column or alter failed:', alterErr.message);
-      }
-    } else {
-      console.log('✅ markets table initialized successfully (with coverUrl column)');
-    }
+    console.log('✅ markets table initialized successfully (with coverUrl column)');
 
     // Market Options table
     await client.execute(`
