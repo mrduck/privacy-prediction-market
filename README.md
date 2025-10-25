@@ -24,10 +24,10 @@
 
 ### 🎬 Project Demo
 
-**Live Demo**: [https://demo.zamapredict.io](https://demo.zamapredict.io)
+**Live Demo**: [https://privacy-prediction-market-frontend.vercel.app/](https://privacy-prediction-market-frontend.vercel.app/)
 
 **Video Demo**:
-[![AegisPredict Demo Video](https://img.shields.io/badge/Watch_Demo-Video-FF0000?logo=youtube)](https://youtube.com/watch?v=your-demo-video-id)
+[![AegisPredict Demo Video](https://youtu.be/svAdPPnLwa4)
 
 
 ### 🚀 Quick Start
