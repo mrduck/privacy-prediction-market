@@ -71,7 +71,7 @@ const Navbar = () => {
                                     className="w-full h-full object-contain" // Ensure image fits container, maintain aspect ratio
                                 />
                             </div>
-                            <h1 className="text-xl font-bold gradient-text">Zama<span
+                            <h1 className="text-xl font-bold gradient-text">Aegis<span
                                 className="text-white ml-1">Predict</span></h1>
                         </Link>
                     </div>
