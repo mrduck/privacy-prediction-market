@@ -12,6 +12,7 @@
     "dev": "node server.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.15.15",
     "cors": "^2.8.5",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
